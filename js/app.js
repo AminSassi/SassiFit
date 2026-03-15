@@ -1,5 +1,3 @@
-import { registerPush, updateInterval } from './firebase.js';
-
 const EXERCISES = [
   { id: 'pushups', name: 'Push-ups', bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', border: 'border-emerald-500/20' },
   { id: 'situps',  name: 'Sit-ups',  bg: 'bg-rose-500',    ring: 'ring-rose-500/30',    text: 'text-rose-400',    border: 'border-rose-500/20' },
@@ -145,7 +143,7 @@ function saveInterval() {
   state.reminderMins = v;
   save();
   startReminders();
-  updateInterval(v);
+  if (window.updateInterval) window.updateInterval(v);
   document.getElementById('intervalStatus').textContent = `Reminder set every ${v} min`;
 }
 
@@ -177,7 +175,7 @@ function updateNotifBtn() {
 
 async function requestNotifications() {
   if (!('Notification' in window)) { alert('Notifications not supported on this browser.'); return; }
-  const token = await registerPush();
+  const token = await window.registerPush();
   if (token) startReminders();
   updateNotifBtn();
 }

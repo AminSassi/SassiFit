@@ -38,6 +38,18 @@ window.registerPush = async function() {
   }
 };
 
+window.testNotification = async function() {
+  const token = localStorage.getItem('fcmToken');
+  if (!token) { alert('Enable notifications first'); return; }
+  const res = await fetch(`${BACKEND_URL}/test`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token })
+  });
+  if (res.ok) alert('Test sent! You should get it in a few seconds.');
+  else alert('Failed: ' + res.status);
+};
+
 window.updateInterval = async function(intervalMins) {
   const token = localStorage.getItem('fcmToken');
   if (!token) return;

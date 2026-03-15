@@ -10,11 +10,17 @@ firebase.initializeApp({
   appId: "1:935160380751:web:92deaffc53eee8f522993a"
 });
 
-const messaging = firebase.messaging();
+let messaging = null;
 
-messaging.onMessage(payload => {
-  new Notification(payload.notification.title, { body: payload.notification.body });
-});
+navigator.serviceWorker.register('/SassiFit/firebase-messaging-sw.js')
+  .then(swReg => {
+    messaging = firebase.messaging();
+    messaging.useServiceWorker(swReg);
+    messaging.onMessage(payload => {
+      new Notification(payload.notification.title, { body: payload.notification.body });
+    });
+  })
+  .catch(e => console.error('SW failed:', e));
 
 window.registerPush = async function() {
   try {

@@ -10,24 +10,18 @@ firebase.initializeApp({
   appId: "1:935160380751:web:92deaffc53eee8f522993a"
 });
 
-let messaging = null;
-
-navigator.serviceWorker.register('/SassiFit/firebase-messaging-sw.js')
-  .then(swReg => {
-    messaging = firebase.messaging();
-    messaging.useServiceWorker(swReg);
-    messaging.onMessage(payload => {
-      new Notification(payload.notification.title, { body: payload.notification.body });
-    });
-  })
-  .catch(e => console.error('SW failed:', e));
-
 window.registerPush = async function() {
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') { alert('Permission denied'); return null; }
-    const token = await messaging.getToken({ vapidKey: VAPID_KEY });
-    if (!token) { alert('No token received — try again'); return null; }
+
+    const swReg = await navigator.serviceWorker.register('/SassiFit/firebase-messaging-sw.js');
+    await navigator.serviceWorker.ready;
+
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+    if (!token) { alert('No token — try again'); return null; }
+
     localStorage.setItem('fcmToken', token);
     const intervalMins = JSON.parse(localStorage.getItem('sassifit') || '{}').reminderMins || 60;
     const res = await fetch(`${BACKEND_URL}/register`, {
@@ -35,7 +29,7 @@ window.registerPush = async function() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, intervalMins })
     });
-    if (res.ok) alert('✓ Notifications registered! You will get reminders every ' + intervalMins + ' min.');
+    if (res.ok) alert('✓ Registered! Reminders every ' + intervalMins + ' min.');
     else alert('Backend error: ' + res.status);
     return token;
   } catch (e) {
@@ -52,7 +46,7 @@ window.testNotification = async function() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token })
   });
-  if (res.ok) alert('Test sent! You should get it in a few seconds.');
+  if (res.ok) alert('Test sent! Check in a few seconds.');
   else alert('Failed: ' + res.status);
 };
 

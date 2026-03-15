@@ -143,19 +143,25 @@ function saveInterval() {
   state.reminderMins = v;
   save();
   startReminders();
-  if (window.updateInterval) window.updateInterval(v);
   document.getElementById('intervalStatus').textContent = `Reminder set every ${v} min`;
 }
 
 function startReminders() {
   if (reminderTimer) clearInterval(reminderTimer);
-  reminderTimer = setInterval(() => {
-    if (Notification.permission !== 'granted') return;
-    const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-    if (total < EXERCISES.length * state.goal) {
-      new Notification('SassiFit', { body: MESSAGES[Math.floor(Math.random() * MESSAGES.length)] });
-    }
-  }, state.reminderMins * 60000);
+  reminderTimer = setInterval(fireReminder, state.reminderMins * 60000);
+}
+
+function fireReminder() {
+  if (Notification.permission !== 'granted') return;
+  const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
+  if (total < EXERCISES.length * state.goal) {
+    new Notification('SassiFit 💪', { body: MESSAGES[Math.floor(Math.random() * MESSAGES.length)] });
+  }
+}
+
+function testNotification() {
+  if (Notification.permission !== 'granted') { alert('Enable notifications first'); return; }
+  new Notification('SassiFit 💪', { body: 'Test notification works!' });
 }
 
 function updateNotifBtn() {
@@ -173,11 +179,15 @@ function updateNotifBtn() {
   }
 }
 
-async function requestNotifications() {
+function requestNotifications() {
   if (!('Notification' in window)) { alert('Notifications not supported on this browser.'); return; }
-  const token = await window.registerPush();
-  if (token) startReminders();
-  updateNotifBtn();
+  Notification.requestPermission().then(p => {
+    updateNotifBtn();
+    if (p === 'granted') {
+      new Notification('SassiFit 💪', { body: 'Reminders on. No more excuses.' });
+      startReminders();
+    }
+  });
 }
 
 render();

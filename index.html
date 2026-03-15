@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
   <title>SassiFit</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><text y='.9em' font-size='72' x='50%' dominant-baseline='auto' text-anchor='middle'>💪</text></svg>" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><text y='.9em' font-size='72' x='50%' dominant-baseline='auto' text-anchor='middle'>💪</text></svg>" />
+  <link rel="icon" type="image/png" href="https://fav.farm/%F0%9F%92%AA" />
+  <link rel="apple-touch-icon" href="https://fav.farm/%F0%9F%92%AA" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { -webkit-tap-highlight-color: transparent; }
@@ -21,12 +21,10 @@
 </head>
 <body class="text-white min-h-screen">
 
-  <!-- Top gradient progress bar -->
   <div class="fixed top-0 left-0 right-0 h-1 bg-zinc-800 z-50">
     <div id="topBar" class="progress-bar h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-rose-500" style="width:0%"></div>
   </div>
 
-  <!-- Header -->
   <header class="fixed top-1 left-0 right-0 z-40 flex items-center justify-between px-5 py-4">
     <span class="text-lg font-bold tracking-widest text-zinc-100">SASSIFIT</span>
     <div class="flex gap-3">
@@ -39,20 +37,12 @@
     </div>
   </header>
 
-  <!-- Main content -->
   <main class="pt-20 pb-8 px-4 max-w-md mx-auto">
-
-    <!-- Date -->
     <p id="dateLabel" class="text-zinc-500 text-sm mb-5 text-center"></p>
-
-    <!-- Exercise cards -->
     <div id="cards" class="flex flex-col gap-4"></div>
-
-    <!-- Reset button -->
     <button onclick="resetAll()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-700 transition-colors">
       Reset Day
     </button>
-
   </main>
 
   <!-- Stats modal -->
@@ -68,29 +58,35 @@
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onclick="if(event.target===this)closeSettings()">
     <div class="bg-zinc-900 rounded-t-2xl w-full max-w-md p-6 pb-10">
       <h2 class="text-lg font-bold mb-4 text-zinc-100">Settings</h2>
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-5">
+
         <div>
           <p class="text-zinc-400 text-sm mb-2">Workout Reminders</p>
           <button onclick="requestNotifications()" id="notifBtn" class="btn-press w-full py-3 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
             Enable Notifications
           </button>
         </div>
+
         <div>
           <p class="text-zinc-400 text-sm mb-2">Remind me every</p>
           <div class="flex items-center gap-2">
-            <input id="intervalInput" type="number" min="1" max="1440" placeholder="60" class="w-20 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
+            <input id="intervalInput" type="number" min="1" max="1440" placeholder="60"
+              class="w-20 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
             <span class="text-zinc-400 text-sm">minutes</span>
             <button onclick="saveInterval()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Set</button>
           </div>
-          <p id="intervalStatus" class="text-zinc-600 text-xs mt-1"></p>
+          <p id="intervalStatus" class="text-zinc-500 text-xs mt-1"></p>
         </div>
+
         <div>
-          <p class="text-zinc-400 text-sm mb-1">Daily Goal per Exercise</p>
+          <p class="text-zinc-400 text-sm mb-2">Daily Goal per Exercise</p>
           <div class="flex items-center gap-3">
-            <input id="goalInput" type="number" min="1" max="500" class="w-24 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
+            <input id="goalInput" type="number" min="1" max="500"
+              class="w-24 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
             <button onclick="saveGoal()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Save</button>
           </div>
         </div>
+
       </div>
       <button onclick="closeSettings()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium">Close</button>
     </div>
@@ -98,101 +94,82 @@
 
 <script>
 const EXERCISES = [
-  { id: 'pushups',  name: 'Push-ups',  color: 'emerald', bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  { id: 'situps',   name: 'Sit-ups',   color: 'rose',    bg: 'bg-rose-500',    ring: 'ring-rose-500/30',    text: 'text-rose-400',    border: 'border-rose-500/20' },
-  { id: 'pullups',  name: 'Pull-ups',  color: 'amber',   bg: 'bg-amber-500',   ring: 'ring-amber-500/30',   text: 'text-amber-400',   border: 'border-amber-500/20' },
-  { id: 'squats',   name: 'Squats',    color: 'blue',    bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    border: 'border-blue-500/20' },
+  { id: 'pushups', name: 'Push-ups', bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  { id: 'situps',  name: 'Sit-ups',  bg: 'bg-rose-500',    ring: 'ring-rose-500/30',    text: 'text-rose-400',    border: 'border-rose-500/20' },
+  { id: 'pullups', name: 'Pull-ups', bg: 'bg-amber-500',   ring: 'ring-amber-500/30',   text: 'text-amber-400',   border: 'border-amber-500/20' },
+  { id: 'squats',  name: 'Squats',   bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    border: 'border-blue-500/20' },
 ];
 
-const REMINDER_MESSAGES = [
-  "Get off the couch. Now.", "Your muscles are waiting. Don't keep them waiting.",
-  "You said you'd work out today. Clock's ticking.", "No excuses. Just reps.",
-  "Every rep counts. Go do them.", "Your future self will thank you. Or not. Your call.",
-  "Time to sweat. You know what to do.", "The only bad workout is the one that didn't happen.",
+const MESSAGES = [
+  "Get off the couch. Now.",
+  "Your muscles are waiting. Don't keep them waiting.",
+  "You said you'd work out today. Clock's ticking.",
+  "No excuses. Just reps.",
+  "Every rep counts. Go do them.",
+  "Your future self will thank you. Or not. Your call.",
+  "Time to sweat. You know what to do.",
+  "The only bad workout is the one that didn't happen.",
 ];
 
-const REMINDER_HOURS = [8, 12, 18, 21];
 const BATCH_SIZE = 10;
+let reminderTimer = null;
+let state = loadState();
 
-let state = load();
-
-function load() {
+function loadState() {
   const today = new Date().toDateString();
-  const saved = JSON.parse(localStorage.getItem('sassifit') || '{}');
-  if (saved.date !== today) {
-    return { date: today, goal: saved.goal || 100, reps: { pushups: 0, situps: 0, pullups: 0, squats: 0 }, notifs: saved.notifs || false };
+  const s = JSON.parse(localStorage.getItem('sassifit') || '{}');
+  if (s.date !== today) {
+    return { date: today, goal: s.goal || 100, reminderMins: s.reminderMins || 60, reps: { pushups: 0, situps: 0, pullups: 0, squats: 0 } };
   }
-  return saved;
+  return s;
 }
 
-function save() {
-  localStorage.setItem('sassifit', JSON.stringify(state));
-}
+function save() { localStorage.setItem('sassifit', JSON.stringify(state)); }
 
 function addReps(id, n) {
   state.reps[id] = Math.max(0, state.reps[id] + n);
-  save();
-  renderCard(id);
-  updateTopBar();
+  save(); renderCard(id); updateTopBar();
 }
 
 function resetAll() {
   EXERCISES.forEach(e => state.reps[e.id] = 0);
-  save();
-  render();
+  save(); render();
 }
 
 function updateTopBar() {
   const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-  const max = EXERCISES.length * state.goal;
-  document.getElementById('topBar').style.width = Math.min(100, (total / max) * 100) + '%';
+  document.getElementById('topBar').style.width = Math.min(100, (total / (EXERCISES.length * state.goal)) * 100) + '%';
 }
 
 function renderCard(id) {
   const ex = EXERCISES.find(e => e.id === id);
   const reps = state.reps[id];
-  const goal = state.goal;
-  const pct = Math.min(100, (reps / goal) * 100);
-  const batches = Math.ceil(goal / BATCH_SIZE);
-  const fullBatches = Math.floor(reps / BATCH_SIZE);
+  const pct = Math.min(100, (reps / state.goal) * 100);
+  const batches = Math.ceil(state.goal / BATCH_SIZE);
+  const full = Math.floor(reps / BATCH_SIZE);
   const partial = reps % BATCH_SIZE;
-
   const card = document.getElementById('card-' + id);
   if (!card) return;
-
   card.querySelector('.rep-count').textContent = reps;
-  card.querySelector('.rep-goal').textContent = '/ ' + goal;
+  card.querySelector('.rep-goal').textContent = '/ ' + state.goal;
   card.querySelector('.prog-bar').style.width = pct + '%';
-
-  const batchRow = card.querySelector('.batch-row');
-  batchRow.innerHTML = '';
+  const row = card.querySelector('.batch-row');
+  row.innerHTML = '';
   for (let i = 0; i < batches; i++) {
     const b = document.createElement('div');
     b.className = 'batch';
-    if (i < fullBatches) b.classList.add(ex.bg);
-    else if (i === fullBatches && partial > 0) {
-      b.classList.add(ex.bg);
-      b.style.opacity = (partial / BATCH_SIZE).toFixed(2);
-    } else {
-      b.classList.add('bg-zinc-700');
-    }
-    batchRow.appendChild(b);
+    if (i < full) b.classList.add(ex.bg);
+    else if (i === full && partial > 0) { b.classList.add(ex.bg); b.style.opacity = (partial / BATCH_SIZE).toFixed(2); }
+    else b.classList.add('bg-zinc-700');
+    row.appendChild(b);
   }
 }
 
 function render() {
   document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  document.getElementById('goalInput').value = state.goal;
-
   const container = document.getElementById('cards');
   container.innerHTML = '';
-
   EXERCISES.forEach(ex => {
-    const reps = state.reps[ex.id];
-    const goal = state.goal;
-    const pct = Math.min(100, (reps / goal) * 100);
-    const batches = Math.ceil(goal / BATCH_SIZE);
-
     const card = document.createElement('div');
     card.id = 'card-' + ex.id;
     card.className = `rounded-2xl bg-zinc-900 border ${ex.border} p-5 ring-1 ${ex.ring}`;
@@ -200,29 +177,26 @@ function render() {
       <div class="flex items-center justify-between mb-3">
         <span class="font-semibold text-zinc-100 text-base">${ex.name}</span>
         <div class="flex items-baseline gap-1">
-          <span class="rep-count text-2xl font-bold ${ex.text}">${reps}</span>
-          <span class="rep-goal text-zinc-500 text-sm">/ ${goal}</span>
+          <span class="rep-count text-2xl font-bold ${ex.text}">0</span>
+          <span class="rep-goal text-zinc-500 text-sm">/ ${state.goal}</span>
         </div>
       </div>
       <div class="batch-row flex gap-1 flex-wrap mb-3"></div>
       <div class="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden">
-        <div class="prog-bar h-1.5 ${ex.bg} rounded-full progress-bar" style="width:${pct}%"></div>
+        <div class="prog-bar h-1.5 ${ex.bg} rounded-full progress-bar" style="width:0%"></div>
       </div>
       <div class="flex gap-2">
-        <button onclick="addReps('${ex.id}', 1)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+1</button>
-        <button onclick="addReps('${ex.id}', 5)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+5</button>
-        <button onclick="addReps('${ex.id}', 10)" class="btn-press flex-1 py-2.5 rounded-xl ${ex.bg} text-white text-sm font-bold hover:opacity-90 transition-opacity">+10</button>
-        <button onclick="addReps('${ex.id}', -1)" class="btn-press px-3 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-sm hover:bg-zinc-700 transition-colors">−</button>
-      </div>
-    `;
+        <button onclick="addReps('${ex.id}',1)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+1</button>
+        <button onclick="addReps('${ex.id}',5)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+5</button>
+        <button onclick="addReps('${ex.id}',10)" class="btn-press flex-1 py-2.5 rounded-xl ${ex.bg} text-white text-sm font-bold hover:opacity-90 transition-opacity">+10</button>
+        <button onclick="addReps('${ex.id}',-1)" class="btn-press px-3 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-sm hover:bg-zinc-700 transition-colors">−</button>
+      </div>`;
     container.appendChild(card);
     renderCard(ex.id);
   });
-
   updateTopBar();
 }
 
-// Stats
 function openStats() {
   const content = document.getElementById('statsContent');
   content.innerHTML = '';
@@ -244,11 +218,10 @@ function openStats() {
 }
 function closeStats() { document.getElementById('statsModal').classList.add('hidden'); }
 
-// Settings
 function openSettings() {
   document.getElementById('goalInput').value = state.goal;
-  document.getElementById('intervalInput').value = state.reminderInterval || 60;
-  document.getElementById('intervalStatus').textContent = state.reminderInterval ? `Currently every ${state.reminderInterval} min` : '';
+  document.getElementById('intervalInput').value = state.reminderMins;
+  document.getElementById('intervalStatus').textContent = `Currently every ${state.reminderMins} min`;
   updateNotifBtn();
   document.getElementById('settingsModal').classList.remove('hidden');
 }
@@ -259,73 +232,55 @@ function saveGoal() {
   if (v > 0) { state.goal = v; save(); render(); closeSettings(); }
 }
 
-// Notification interval
-let reminderInterval = null;
-
 function saveInterval() {
   const v = parseInt(document.getElementById('intervalInput').value);
   if (!v || v < 1) return;
-  state.reminderInterval = v;
+  state.reminderMins = v;
   save();
-  startReminderInterval();
+  startReminders();
   document.getElementById('intervalStatus').textContent = `Reminder set every ${v} min`;
 }
 
-function startReminderInterval() {
-  if (reminderInterval) clearInterval(reminderInterval);
-  const mins = state.reminderInterval || 60;
-  reminderInterval = setInterval(() => {
+function startReminders() {
+  if (reminderTimer) clearInterval(reminderTimer);
+  reminderTimer = setInterval(() => {
     if (Notification.permission !== 'granted') return;
     const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-    const max = EXERCISES.length * state.goal;
-    if (total < max) {
-      const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
-      new Notification('SassiFit', { body: msg });
+    if (total < EXERCISES.length * state.goal) {
+      new Notification('SassiFit', { body: MESSAGES[Math.floor(Math.random() * MESSAGES.length)] });
     }
-  }, mins * 60000);
+  }, state.reminderMins * 60000);
 }
 
-// Notifications
 function updateNotifBtn() {
   const btn = document.getElementById('notifBtn');
+  btn.className = 'btn-press w-full py-3 rounded-xl bg-zinc-800 text-sm font-medium hover:bg-zinc-700 transition-colors';
   if (Notification.permission === 'granted') {
     btn.textContent = '✓ Notifications Enabled';
     btn.classList.add('text-emerald-400');
   } else if (Notification.permission === 'denied') {
-    btn.textContent = 'Notifications Blocked — Enable in Settings';
+    btn.textContent = 'Blocked — Enable in Phone Settings';
     btn.classList.add('text-rose-400');
+  } else {
+    btn.textContent = 'Enable Notifications';
+    btn.classList.add('text-zinc-300');
   }
 }
 
 function requestNotifications() {
-  if (!('Notification' in window)) return;
+  if (!('Notification' in window)) { alert('Notifications not supported on this browser.'); return; }
   Notification.requestPermission().then(p => {
     if (p === 'granted') {
-      state.notifs = true; save();
-      new Notification('SassiFit', { body: "Reminders on. No more excuses.", icon: '' });
+      new Notification('SassiFit', { body: 'Reminders on. No more excuses.' });
+      startReminders();
     }
     updateNotifBtn();
   });
 }
 
-function checkReminders() {
-  if (Notification.permission !== 'granted') return;
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  if (REMINDER_HOURS.includes(h) && m === 0) {
-    const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-    const max = EXERCISES.length * state.goal;
-    if (total < max) {
-      const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
-      new Notification('SassiFit', { body: msg });
-    }
-  }
-}
-
-// Init
 render();
 updateNotifBtn();
-startReminderInterval();
+startReminders();
 </script>
 </body>
 </html>

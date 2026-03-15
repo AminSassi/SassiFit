@@ -1,0 +1,5 @@
+* { -webkit-tap-highlight-color: transparent; }
+body { background: #09090b; overscroll-behavior: none; }
+.batch { width: 18px; height: 8px; border-radius: 3px; }
+.progress-bar { transition: width 0.3s ease; }
+.btn-press:active { transform: scale(0.94); }

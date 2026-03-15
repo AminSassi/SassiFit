@@ -19,19 +19,21 @@ messaging.onMessage(payload => {
 window.registerPush = async function() {
   try {
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return null;
+    if (permission !== 'granted') { alert('Permission denied'); return null; }
     const token = await messaging.getToken({ vapidKey: VAPID_KEY });
-    if (!token) return null;
+    if (!token) { alert('No token received — try again'); return null; }
     localStorage.setItem('fcmToken', token);
     const intervalMins = JSON.parse(localStorage.getItem('sassifit') || '{}').reminderMins || 60;
-    await fetch(`${BACKEND_URL}/register`, {
+    const res = await fetch(`${BACKEND_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, intervalMins })
     });
+    if (res.ok) alert('✓ Notifications registered! You will get reminders every ' + intervalMins + ' min.');
+    else alert('Backend error: ' + res.status);
     return token;
   } catch (e) {
-    console.error('Push registration failed:', e);
+    alert('Error: ' + e.message);
     return null;
   }
 };

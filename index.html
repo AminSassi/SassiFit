@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
   <title>SassiFit</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><text y='.9em' font-size='72' x='50%' dominant-baseline='auto' text-anchor='middle'>💪</text></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><text y='.9em' font-size='72' x='50%' dominant-baseline='auto' text-anchor='middle'>💪</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { -webkit-tap-highlight-color: transparent; }
@@ -74,13 +76,13 @@
           </button>
         </div>
         <div>
-          <p class="text-zinc-400 text-sm mb-2">Reminder Times</p>
-          <div class="flex gap-2 flex-wrap">
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">8:00 AM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">12:00 PM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">6:00 PM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">9:00 PM</span>
+          <p class="text-zinc-400 text-sm mb-2">Remind me every</p>
+          <div class="flex items-center gap-2">
+            <input id="intervalInput" type="number" min="1" max="1440" placeholder="60" class="w-20 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
+            <span class="text-zinc-400 text-sm">minutes</span>
+            <button onclick="saveInterval()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Set</button>
           </div>
+          <p id="intervalStatus" class="text-zinc-600 text-xs mt-1"></p>
         </div>
         <div>
           <p class="text-zinc-400 text-sm mb-1">Daily Goal per Exercise</p>
@@ -245,6 +247,8 @@ function closeStats() { document.getElementById('statsModal').classList.add('hid
 // Settings
 function openSettings() {
   document.getElementById('goalInput').value = state.goal;
+  document.getElementById('intervalInput').value = state.reminderInterval || 60;
+  document.getElementById('intervalStatus').textContent = state.reminderInterval ? `Currently every ${state.reminderInterval} min` : '';
   updateNotifBtn();
   document.getElementById('settingsModal').classList.remove('hidden');
 }
@@ -253,6 +257,32 @@ function closeSettings() { document.getElementById('settingsModal').classList.ad
 function saveGoal() {
   const v = parseInt(document.getElementById('goalInput').value);
   if (v > 0) { state.goal = v; save(); render(); closeSettings(); }
+}
+
+// Notification interval
+let reminderInterval = null;
+
+function saveInterval() {
+  const v = parseInt(document.getElementById('intervalInput').value);
+  if (!v || v < 1) return;
+  state.reminderInterval = v;
+  save();
+  startReminderInterval();
+  document.getElementById('intervalStatus').textContent = `Reminder set every ${v} min`;
+}
+
+function startReminderInterval() {
+  if (reminderInterval) clearInterval(reminderInterval);
+  const mins = state.reminderInterval || 60;
+  reminderInterval = setInterval(() => {
+    if (Notification.permission !== 'granted') return;
+    const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
+    const max = EXERCISES.length * state.goal;
+    if (total < max) {
+      const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+      new Notification('SassiFit', { body: msg });
+    }
+  }, mins * 60000);
 }
 
 // Notifications
@@ -295,7 +325,7 @@ function checkReminders() {
 // Init
 render();
 updateNotifBtn();
-setInterval(checkReminders, 60000);
+startReminderInterval();
 </script>
 </body>
 </html>

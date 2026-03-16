@@ -155,18 +155,24 @@
       flex: 1; padding: 10px 0;
       border: none; border-radius: 12px;
       font-family: var(--font); font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: transform 0.1s, opacity 0.15s;
-      color: rgba(255,255,255,0.85);
-      background: var(--fill);
+      cursor: pointer; transition: transform 0.1s, background 0.15s;
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
-    .btn:active { transform: scale(0.91); opacity: 0.75; }
+    .btn:active { transform: scale(0.91); background: rgba(255,255,255,0.13); }
     .btn-primary {
-      color: #fff;
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.11);
+      border-color: rgba(255,255,255,0.14);
       font-weight: 700;
     }
+    .btn-primary:active { background: rgba(255,255,255,0.18); }
     .btn-minus {
       flex: 0 0 44px;
-      color: var(--label);
+      color: rgba(255,255,255,0.35);
       font-size: 18px;
     }
 
@@ -274,11 +280,15 @@
     .goal-input:focus { border-color: rgba(255,255,255,0.25); }
     .save-btn {
       padding: 10px 20px; border: none; border-radius: 12px;
-      background: #30d158; color: #fff;
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.85);
       font-family: var(--font); font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
-    .save-btn:active { opacity: 0.75; transform: scale(0.95); }
+    .save-btn:active { background: rgba(255,255,255,0.18); transform: scale(0.95); }
 
     /* Colors */
     .c-green  { color: #30d158; }
@@ -435,7 +445,7 @@ function render() {
       <div class="btn-row">
         <button class="btn" onclick="addReps('${ex.id}',1)">+1</button>
         <button class="btn" onclick="addReps('${ex.id}',5)">+5</button>
-        <button class="btn btn-primary ${ex.bg}" onclick="addReps('${ex.id}',10)">+10</button>
+        <button class="btn btn-primary" onclick="addReps('${ex.id}',10)">+10</button>
         <button class="btn btn-minus" onclick="addReps('${ex.id}',-1)">−</button>
       </div>`;
     container.appendChild(card);

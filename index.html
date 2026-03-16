@@ -3,112 +3,362 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#09090b" />
+  <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
   <title>SassiFit</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { -webkit-tap-highlight-color: transparent; }
-    body { background: #09090b; overscroll-behavior: none; }
-    .batch { width: 18px; height: 8px; border-radius: 3px; }
-    .progress-bar { transition: width 0.3s ease; }
-    .btn-press:active { transform: scale(0.94); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #000;
+      --card: rgba(28, 28, 30, 0.85);
+      --card-border: rgba(255,255,255,0.08);
+      --label: rgba(235,235,245,0.6);
+      --label2: rgba(235,235,245,0.3);
+      --fill: rgba(255,255,255,0.07);
+      --fill2: rgba(255,255,255,0.04);
+      --radius: 20px;
+      --font: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: var(--font);
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, #30d158, transparent);
+      top: -80px; left: -60px;
+    }
+    body::after {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, #0a84ff, transparent);
+      bottom: 60px; right: -60px;
+    }
+
+    /* Top progress bar */
+    #topBarWrap {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px;
+      background: rgba(255,255,255,0.06); z-index: 100;
+    }
+    #topBar {
+      height: 100%;
+      background: linear-gradient(90deg, #30d158, #0a84ff, #ff375f);
+      transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      width: 0%;
+    }
+
+    /* Header */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 54px 20px 12px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+      backdrop-filter: blur(0px);
+    }
+    .app-title {
+      font-size: 17px; font-weight: 700;
+      letter-spacing: 0.12em; color: rgba(255,255,255,0.9);
+    }
+    .header-btns { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: none; cursor: pointer; color: rgba(255,255,255,0.7);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+      backdrop-filter: blur(10px);
+    }
+    .icon-btn:active { transform: scale(0.88); background: rgba(255,255,255,0.14); }
+
+    /* Main */
+    main {
+      position: relative; z-index: 1;
+      padding: 120px 16px 40px;
+      max-width: 430px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    #dateLabel {
+      text-align: center;
+      font-size: 13px; font-weight: 500;
+      color: var(--label2);
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      transition: transform 0.15s;
+    }
+    .card:active { transform: scale(0.985); }
+
+    .card-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .ex-name {
+      font-size: 15px; font-weight: 600;
+      color: rgba(255,255,255,0.85);
+    }
+    .rep-display { display: flex; align-items: baseline; gap: 4px; }
+    .rep-count { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+    .rep-goal { font-size: 13px; color: var(--label2); font-weight: 500; }
+
+    /* Batch dots */
+    .batch-row {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      margin-bottom: 10px;
+    }
+    .batch {
+      width: 16px; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    /* Progress bar */
+    .prog-wrap {
+      height: 3px; background: rgba(255,255,255,0.08);
+      border-radius: 99px; overflow: hidden; margin-bottom: 14px;
+    }
+    .prog-bar {
+      height: 100%; border-radius: 99px;
+      transition: width 0.35s cubic-bezier(0.34,1.2,0.64,1);
+    }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      flex: 1; padding: 10px 0;
+      border: none; border-radius: 12px;
+      font-family: var(--font); font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: transform 0.1s, opacity 0.15s;
+      color: rgba(255,255,255,0.85);
+      background: var(--fill);
+    }
+    .btn:active { transform: scale(0.91); opacity: 0.75; }
+    .btn-primary {
+      color: #fff;
+      font-weight: 700;
+    }
+    .btn-minus {
+      flex: 0 0 44px;
+      color: var(--label);
+      font-size: 18px;
+    }
+
+    /* Reset */
+    #resetBtn {
+      margin-top: 4px;
+      width: 100%; padding: 13px;
+      border: none; border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: rgba(235,235,245,0.4);
+      font-family: var(--font); font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    #resetBtn:active { transform: scale(0.97); background: rgba(255,255,255,0.09); }
+
+    /* Modals */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-sheet {
+      background: rgba(28,28,30,0.96);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 430px;
+      padding: 8px 20px 40px;
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      animation: slideUp 0.32s cubic-bezier(0.32,0.72,0,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.2);
+      margin: 8px auto 20px;
+    }
+    .modal-title {
+      font-size: 17px; font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 18px;
+    }
+    .modal-close {
+      margin-top: 20px; width: 100%; padding: 13px;
+      border: none; border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      color: rgba(235,235,245,0.6);
+      font-family: var(--font); font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .modal-close:active { transform: scale(0.97); }
+
+    /* Stats rows */
+    .stat-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-name { font-size: 15px; color: rgba(255,255,255,0.75); }
+    .stat-right { display: flex; align-items: center; gap: 10px; }
+    .stat-bar-wrap { width: 100px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 99px; }
+    .stat-num { font-size: 14px; font-weight: 600; min-width: 28px; text-align: right; }
+
+    /* Settings */
+    .setting-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--label2); text-transform: uppercase;
+      margin-bottom: 8px; margin-top: 16px;
+    }
+    .setting-label:first-child { margin-top: 0; }
+    .notif-btn {
+      width: 100%; padding: 13px;
+      border: none; border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      color: rgba(235,235,245,0.75);
+      font-family: var(--font); font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .notif-btn:active { transform: scale(0.97); }
+    .pill-times { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      padding: 5px 12px; border-radius: 99px;
+      background: rgba(255,255,255,0.07);
+      font-size: 12px; font-weight: 500;
+      color: rgba(235,235,245,0.5);
+    }
+    .goal-row { display: flex; align-items: center; gap: 10px; }
+    .goal-input {
+      width: 80px; padding: 10px 12px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: #fff;
+      font-family: var(--font); font-size: 15px;
+      outline: none;
+    }
+    .goal-input:focus { border-color: rgba(255,255,255,0.25); }
+    .save-btn {
+      padding: 10px 20px; border: none; border-radius: 12px;
+      background: #30d158; color: #fff;
+      font-family: var(--font); font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+    }
+    .save-btn:active { opacity: 0.75; transform: scale(0.95); }
+
+    /* Colors */
+    .c-green  { color: #30d158; }
+    .c-red    { color: #ff375f; }
+    .c-amber  { color: #ffd60a; }
+    .c-blue   { color: #0a84ff; }
+    .bg-green { background: #30d158; }
+    .bg-red   { background: #ff375f; }
+    .bg-amber { background: #ffd60a; }
+    .bg-blue  { background: #0a84ff; }
   </style>
 </head>
-<body class="text-white min-h-screen">
+<body>
 
-  <!-- Top gradient progress bar -->
-  <div class="fixed top-0 left-0 right-0 h-1 bg-zinc-800 z-50">
-    <div id="topBar" class="progress-bar h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-rose-500" style="width:0%"></div>
-  </div>
+  <div id="topBarWrap"><div id="topBar"></div></div>
 
-  <!-- Header -->
-  <header class="fixed top-1 left-0 right-0 z-40 flex items-center justify-between px-5 py-4">
-    <span class="text-lg font-bold tracking-widest text-zinc-100">SASSIFIT</span>
-    <div class="flex gap-3">
-      <button onclick="openStats()" class="btn-press text-zinc-400 hover:text-white transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  <header>
+    <span class="app-title">SASSIFIT</span>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="openStats()" aria-label="Stats">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       </button>
-      <button onclick="openSettings()" class="btn-press text-zinc-400 hover:text-white transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
   </header>
 
-  <!-- Main content -->
-  <main class="pt-20 pb-8 px-4 max-w-md mx-auto">
-
-    <!-- Date -->
-    <p id="dateLabel" class="text-zinc-500 text-sm mb-5 text-center"></p>
-
-    <!-- Exercise cards -->
-    <div id="cards" class="flex flex-col gap-4"></div>
-
-    <!-- Reset button -->
-    <button onclick="resetAll()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-700 transition-colors">
-      Reset Day
-    </button>
-
+  <main>
+    <p id="dateLabel"></p>
+    <div id="cards"></div>
+    <button id="resetBtn" onclick="resetAll()">Reset Day</button>
   </main>
 
   <!-- Stats modal -->
-  <div id="statsModal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onclick="if(event.target===this)closeStats()">
-    <div class="bg-zinc-900 rounded-t-2xl w-full max-w-md p-6 pb-10">
-      <h2 class="text-lg font-bold mb-4 text-zinc-100">Stats</h2>
-      <div id="statsContent" class="flex flex-col gap-3"></div>
-      <button onclick="closeStats()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium">Close</button>
+  <div id="statsModal" class="modal-backdrop" onclick="if(event.target===this)closeStats()">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Today</div>
+      <div id="statsContent"></div>
+      <button class="modal-close" onclick="closeStats()">Done</button>
     </div>
   </div>
 
   <!-- Settings modal -->
-  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onclick="if(event.target===this)closeSettings()">
-    <div class="bg-zinc-900 rounded-t-2xl w-full max-w-md p-6 pb-10">
-      <h2 class="text-lg font-bold mb-4 text-zinc-100">Settings</h2>
-      <div class="flex flex-col gap-4">
-        <div>
-          <p class="text-zinc-400 text-sm mb-2">Workout Reminders</p>
-          <button onclick="requestNotifications()" id="notifBtn" class="btn-press w-full py-3 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
-            Enable Notifications
-          </button>
-        </div>
-        <div>
-          <p class="text-zinc-400 text-sm mb-2">Reminder Times</p>
-          <div class="flex gap-2 flex-wrap">
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">8:00 AM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">12:00 PM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">6:00 PM</span>
-            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">9:00 PM</span>
-          </div>
-        </div>
-        <div>
-          <p class="text-zinc-400 text-sm mb-1">Daily Goal per Exercise</p>
-          <div class="flex items-center gap-3">
-            <input id="goalInput" type="number" min="1" max="500" class="w-24 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
-            <button onclick="saveGoal()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Save</button>
-          </div>
-        </div>
+  <div id="settingsModal" class="modal-backdrop" onclick="if(event.target===this)closeSettings()">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Settings</div>
+      <p class="setting-label">Notifications</p>
+      <button id="notifBtn" class="notif-btn" onclick="requestNotifications()">Enable Workout Reminders</button>
+      <p class="setting-label">Reminder Times</p>
+      <div class="pill-times">
+        <span class="pill">8:00 AM</span>
+        <span class="pill">12:00 PM</span>
+        <span class="pill">6:00 PM</span>
+        <span class="pill">9:00 PM</span>
       </div>
-      <button onclick="closeSettings()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium">Close</button>
+      <p class="setting-label">Daily Goal</p>
+      <div class="goal-row">
+        <input id="goalInput" class="goal-input" type="number" min="1" max="500" />
+        <button class="save-btn" onclick="saveGoal()">Save</button>
+      </div>
+      <button class="modal-close" onclick="closeSettings()">Done</button>
     </div>
   </div>
 
 <script>
 const EXERCISES = [
-  { id: 'pushups',  name: 'Push-ups',  color: 'emerald', bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  { id: 'situps',   name: 'Sit-ups',   color: 'rose',    bg: 'bg-rose-500',    ring: 'ring-rose-500/30',    text: 'text-rose-400',    border: 'border-rose-500/20' },
-  { id: 'pullups',  name: 'Pull-ups',  color: 'amber',   bg: 'bg-amber-500',   ring: 'ring-amber-500/30',   text: 'text-amber-400',   border: 'border-amber-500/20' },
-  { id: 'squats',   name: 'Squats',    color: 'blue',    bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    border: 'border-blue-500/20' },
+  { id: 'pushups', name: 'Push-ups', color: 'green', c: 'c-green', bg: 'bg-green' },
+  { id: 'situps',  name: 'Sit-ups',  color: 'red',   c: 'c-red',   bg: 'bg-red'   },
+  { id: 'pullups', name: 'Pull-ups', color: 'amber', c: 'c-amber', bg: 'bg-amber' },
+  { id: 'squats',  name: 'Squats',   color: 'blue',  c: 'c-blue',  bg: 'bg-blue'  },
 ];
 
 const REMINDER_MESSAGES = [
-  "Get off the couch. Now.", "Your muscles are waiting. Don't keep them waiting.",
-  "You said you'd work out today. Clock's ticking.", "No excuses. Just reps.",
-  "Every rep counts. Go do them.", "Your future self will thank you. Or not. Your call.",
-  "Time to sweat. You know what to do.", "The only bad workout is the one that didn't happen.",
+  "Get off the couch. Now.", "Your muscles are waiting.",
+  "No excuses. Just reps.", "Every rep counts. Go do them.",
+  "Time to sweat. You know what to do.",
 ];
-
 const REMINDER_HOURS = [8, 12, 18, 21];
 const BATCH_SIZE = 10;
 
@@ -123,57 +373,42 @@ function load() {
   return saved;
 }
 
-function save() {
-  localStorage.setItem('sassifit', JSON.stringify(state));
-}
+function save() { localStorage.setItem('sassifit', JSON.stringify(state)); }
 
 function addReps(id, n) {
   state.reps[id] = Math.max(0, state.reps[id] + n);
-  save();
-  renderCard(id);
-  updateTopBar();
+  save(); renderCard(id); updateTopBar();
 }
 
 function resetAll() {
   EXERCISES.forEach(e => state.reps[e.id] = 0);
-  save();
-  render();
+  save(); render();
 }
 
 function updateTopBar() {
   const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-  const max = EXERCISES.length * state.goal;
-  document.getElementById('topBar').style.width = Math.min(100, (total / max) * 100) + '%';
+  document.getElementById('topBar').style.width = Math.min(100, (total / (EXERCISES.length * state.goal)) * 100) + '%';
 }
 
 function renderCard(id) {
   const ex = EXERCISES.find(e => e.id === id);
-  const reps = state.reps[id];
-  const goal = state.goal;
+  const reps = state.reps[id], goal = state.goal;
   const pct = Math.min(100, (reps / goal) * 100);
-  const batches = Math.ceil(goal / BATCH_SIZE);
-  const fullBatches = Math.floor(reps / BATCH_SIZE);
-  const partial = reps % BATCH_SIZE;
-
   const card = document.getElementById('card-' + id);
   if (!card) return;
-
   card.querySelector('.rep-count').textContent = reps;
   card.querySelector('.rep-goal').textContent = '/ ' + goal;
   card.querySelector('.prog-bar').style.width = pct + '%';
-
   const batchRow = card.querySelector('.batch-row');
+  const batches = Math.ceil(goal / BATCH_SIZE);
+  const full = Math.floor(reps / BATCH_SIZE);
+  const partial = reps % BATCH_SIZE;
   batchRow.innerHTML = '';
   for (let i = 0; i < batches; i++) {
     const b = document.createElement('div');
     b.className = 'batch';
-    if (i < fullBatches) b.classList.add(ex.bg);
-    else if (i === fullBatches && partial > 0) {
-      b.classList.add(ex.bg);
-      b.style.opacity = (partial / BATCH_SIZE).toFixed(2);
-    } else {
-      b.classList.add('bg-zinc-700');
-    }
+    if (i < full) { b.classList.add(ex.bg); }
+    else if (i === full && partial > 0) { b.classList.add(ex.bg); b.style.opacity = (partial / BATCH_SIZE).toFixed(2); }
     batchRow.appendChild(b);
   }
 }
@@ -181,89 +416,75 @@ function renderCard(id) {
 function render() {
   document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   document.getElementById('goalInput').value = state.goal;
-
   const container = document.getElementById('cards');
   container.innerHTML = '';
-
   EXERCISES.forEach(ex => {
-    const reps = state.reps[ex.id];
-    const goal = state.goal;
-    const pct = Math.min(100, (reps / goal) * 100);
-    const batches = Math.ceil(goal / BATCH_SIZE);
-
     const card = document.createElement('div');
     card.id = 'card-' + ex.id;
-    card.className = `rounded-2xl bg-zinc-900 border ${ex.border} p-5 ring-1 ${ex.ring}`;
+    card.className = 'card';
     card.innerHTML = `
-      <div class="flex items-center justify-between mb-3">
-        <span class="font-semibold text-zinc-100 text-base">${ex.name}</span>
-        <div class="flex items-baseline gap-1">
-          <span class="rep-count text-2xl font-bold ${ex.text}">${reps}</span>
-          <span class="rep-goal text-zinc-500 text-sm">/ ${goal}</span>
+      <div class="card-top">
+        <span class="ex-name">${ex.name}</span>
+        <div class="rep-display">
+          <span class="rep-count ${ex.c}">0</span>
+          <span class="rep-goal">/ ${state.goal}</span>
         </div>
       </div>
-      <div class="batch-row flex gap-1 flex-wrap mb-3"></div>
-      <div class="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden">
-        <div class="prog-bar h-1.5 ${ex.bg} rounded-full progress-bar" style="width:${pct}%"></div>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="addReps('${ex.id}', 1)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+1</button>
-        <button onclick="addReps('${ex.id}', 5)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+5</button>
-        <button onclick="addReps('${ex.id}', 10)" class="btn-press flex-1 py-2.5 rounded-xl ${ex.bg} text-white text-sm font-bold hover:opacity-90 transition-opacity">+10</button>
-        <button onclick="addReps('${ex.id}', -1)" class="btn-press px-3 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-sm hover:bg-zinc-700 transition-colors">−</button>
-      </div>
-    `;
+      <div class="batch-row"></div>
+      <div class="prog-wrap"><div class="prog-bar ${ex.bg}"></div></div>
+      <div class="btn-row">
+        <button class="btn" onclick="addReps('${ex.id}',1)">+1</button>
+        <button class="btn" onclick="addReps('${ex.id}',5)">+5</button>
+        <button class="btn btn-primary ${ex.bg}" onclick="addReps('${ex.id}',10)">+10</button>
+        <button class="btn btn-minus" onclick="addReps('${ex.id}',-1)">−</button>
+      </div>`;
     container.appendChild(card);
     renderCard(ex.id);
   });
-
   updateTopBar();
 }
 
-// Stats
 function openStats() {
   const content = document.getElementById('statsContent');
   content.innerHTML = '';
   EXERCISES.forEach(ex => {
     const reps = state.reps[ex.id];
     const pct = Math.min(100, Math.round((reps / state.goal) * 100));
-    content.innerHTML += `
-      <div class="flex items-center justify-between">
-        <span class="text-zinc-300 text-sm">${ex.name}</span>
-        <div class="flex items-center gap-3">
-          <div class="w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div class="h-1.5 ${ex.bg} rounded-full" style="width:${pct}%"></div>
-          </div>
-          <span class="${ex.text} text-sm font-semibold w-8 text-right">${reps}</span>
-        </div>
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    row.innerHTML = `
+      <span class="stat-name">${ex.name}</span>
+      <div class="stat-right">
+        <div class="stat-bar-wrap"><div class="stat-bar ${ex.bg}" style="width:${pct}%"></div></div>
+        <span class="stat-num ${ex.c}">${reps}</span>
       </div>`;
+    content.appendChild(row);
   });
-  document.getElementById('statsModal').classList.remove('hidden');
+  document.getElementById('statsModal').classList.add('open');
 }
-function closeStats() { document.getElementById('statsModal').classList.add('hidden'); }
+function closeStats() { document.getElementById('statsModal').classList.remove('open'); }
 
-// Settings
 function openSettings() {
   document.getElementById('goalInput').value = state.goal;
   updateNotifBtn();
-  document.getElementById('settingsModal').classList.remove('hidden');
+  document.getElementById('settingsModal').classList.add('open');
 }
-function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
 
 function saveGoal() {
   const v = parseInt(document.getElementById('goalInput').value);
   if (v > 0) { state.goal = v; save(); render(); closeSettings(); }
 }
 
-// Notifications
 function updateNotifBtn() {
   const btn = document.getElementById('notifBtn');
+  if (!('Notification' in window)) { btn.textContent = 'Notifications Not Supported'; return; }
   if (Notification.permission === 'granted') {
-    btn.textContent = '✓ Notifications Enabled';
-    btn.classList.add('text-emerald-400');
+    btn.textContent = '✓ Reminders Enabled';
+    btn.style.color = '#30d158';
   } else if (Notification.permission === 'denied') {
-    btn.textContent = 'Notifications Blocked — Enable in Settings';
-    btn.classList.add('text-rose-400');
+    btn.textContent = 'Blocked — Enable in iPhone Settings';
+    btn.style.color = '#ff375f';
   }
 }
 
@@ -272,7 +493,7 @@ function requestNotifications() {
   Notification.requestPermission().then(p => {
     if (p === 'granted') {
       state.notifs = true; save();
-      new Notification('SassiFit', { body: "Reminders on. No more excuses.", icon: '' });
+      new Notification('SassiFit', { body: 'Reminders on. No more excuses.' });
     }
     updateNotifBtn();
   });
@@ -281,18 +502,14 @@ function requestNotifications() {
 function checkReminders() {
   if (Notification.permission !== 'granted') return;
   const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  if (REMINDER_HOURS.includes(h) && m === 0) {
+  if (REMINDER_HOURS.includes(now.getHours()) && now.getMinutes() === 0) {
     const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
-    const max = EXERCISES.length * state.goal;
-    if (total < max) {
-      const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
-      new Notification('SassiFit', { body: msg });
+    if (total < EXERCISES.length * state.goal) {
+      new Notification('SassiFit', { body: REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)] });
     }
   }
 }
 
-// Init
 render();
 updateNotifBtn();
 setInterval(checkReminders, 60000);

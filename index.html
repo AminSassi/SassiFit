@@ -8,17 +8,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
   <title>SassiFit</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>💪</text></svg>" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>💪</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background: #09090b; overscroll-behavior: none; }
+    .batch { width: 18px; height: 8px; border-radius: 3px; }
+    .progress-bar { transition: width 0.3s ease; }
+    .btn-press:active { transform: scale(0.94); }
+  </style>
 </head>
 <body class="text-white min-h-screen">
 
+  <!-- Top gradient progress bar -->
   <div class="fixed top-0 left-0 right-0 h-1 bg-zinc-800 z-50">
     <div id="topBar" class="progress-bar h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-rose-500" style="width:0%"></div>
   </div>
 
+  <!-- Header -->
   <header class="fixed top-1 left-0 right-0 z-40 flex items-center justify-between px-5 py-4">
     <span class="text-lg font-bold tracking-widest text-zinc-100">SASSIFIT</span>
     <div class="flex gap-3">
@@ -31,12 +37,20 @@
     </div>
   </header>
 
+  <!-- Main content -->
   <main class="pt-20 pb-8 px-4 max-w-md mx-auto">
+
+    <!-- Date -->
     <p id="dateLabel" class="text-zinc-500 text-sm mb-5 text-center"></p>
+
+    <!-- Exercise cards -->
     <div id="cards" class="flex flex-col gap-4"></div>
+
+    <!-- Reset button -->
     <button onclick="resetAll()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-700 transition-colors">
       Reset Day
     </button>
+
   </main>
 
   <!-- Stats modal -->
@@ -52,43 +66,236 @@
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onclick="if(event.target===this)closeSettings()">
     <div class="bg-zinc-900 rounded-t-2xl w-full max-w-md p-6 pb-10">
       <h2 class="text-lg font-bold mb-4 text-zinc-100">Settings</h2>
-      <div class="flex flex-col gap-5">
-
+      <div class="flex flex-col gap-4">
         <div>
           <p class="text-zinc-400 text-sm mb-2">Workout Reminders</p>
           <button onclick="requestNotifications()" id="notifBtn" class="btn-press w-full py-3 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">
             Enable Notifications
           </button>
-          <button onclick="testNotification()" class="btn-press mt-2 w-full py-3 rounded-xl bg-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-600 transition-colors">
-            Send Test Notification
-          </button>
         </div>
-
         <div>
-          <p class="text-zinc-400 text-sm mb-2">Remind me every</p>
-          <div class="flex items-center gap-2">
-            <input id="intervalInput" type="number" min="1" max="1440" placeholder="60"
-              class="w-20 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
-            <span class="text-zinc-400 text-sm">minutes</span>
-            <button onclick="saveInterval()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Set</button>
+          <p class="text-zinc-400 text-sm mb-2">Reminder Times</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">8:00 AM</span>
+            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">12:00 PM</span>
+            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">6:00 PM</span>
+            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs">9:00 PM</span>
           </div>
-          <p id="intervalStatus" class="text-zinc-500 text-xs mt-1"></p>
         </div>
-
         <div>
-          <p class="text-zinc-400 text-sm mb-2">Daily Goal per Exercise</p>
+          <p class="text-zinc-400 text-sm mb-1">Daily Goal per Exercise</p>
           <div class="flex items-center gap-3">
-            <input id="goalInput" type="number" min="1" max="500"
-              class="w-24 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
+            <input id="goalInput" type="number" min="1" max="500" class="w-24 bg-zinc-800 text-white text-sm rounded-lg px-3 py-2 border border-zinc-700 focus:outline-none focus:border-zinc-500" />
             <button onclick="saveGoal()" class="btn-press px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors">Save</button>
           </div>
         </div>
-
       </div>
       <button onclick="closeSettings()" class="btn-press mt-6 w-full py-3 rounded-xl bg-zinc-800 text-zinc-400 text-sm font-medium">Close</button>
     </div>
   </div>
 
-  <script src="js/app.js"></script>
+<script>
+const EXERCISES = [
+  { id: 'pushups',  name: 'Push-ups',  color: 'emerald', bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  { id: 'situps',   name: 'Sit-ups',   color: 'rose',    bg: 'bg-rose-500',    ring: 'ring-rose-500/30',    text: 'text-rose-400',    border: 'border-rose-500/20' },
+  { id: 'pullups',  name: 'Pull-ups',  color: 'amber',   bg: 'bg-amber-500',   ring: 'ring-amber-500/30',   text: 'text-amber-400',   border: 'border-amber-500/20' },
+  { id: 'squats',   name: 'Squats',    color: 'blue',    bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    border: 'border-blue-500/20' },
+];
+
+const REMINDER_MESSAGES = [
+  "Get off the couch. Now.", "Your muscles are waiting. Don't keep them waiting.",
+  "You said you'd work out today. Clock's ticking.", "No excuses. Just reps.",
+  "Every rep counts. Go do them.", "Your future self will thank you. Or not. Your call.",
+  "Time to sweat. You know what to do.", "The only bad workout is the one that didn't happen.",
+];
+
+const REMINDER_HOURS = [8, 12, 18, 21];
+const BATCH_SIZE = 10;
+
+let state = load();
+
+function load() {
+  const today = new Date().toDateString();
+  const saved = JSON.parse(localStorage.getItem('sassifit') || '{}');
+  if (saved.date !== today) {
+    return { date: today, goal: saved.goal || 100, reps: { pushups: 0, situps: 0, pullups: 0, squats: 0 }, notifs: saved.notifs || false };
+  }
+  return saved;
+}
+
+function save() {
+  localStorage.setItem('sassifit', JSON.stringify(state));
+}
+
+function addReps(id, n) {
+  state.reps[id] = Math.max(0, state.reps[id] + n);
+  save();
+  renderCard(id);
+  updateTopBar();
+}
+
+function resetAll() {
+  EXERCISES.forEach(e => state.reps[e.id] = 0);
+  save();
+  render();
+}
+
+function updateTopBar() {
+  const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
+  const max = EXERCISES.length * state.goal;
+  document.getElementById('topBar').style.width = Math.min(100, (total / max) * 100) + '%';
+}
+
+function renderCard(id) {
+  const ex = EXERCISES.find(e => e.id === id);
+  const reps = state.reps[id];
+  const goal = state.goal;
+  const pct = Math.min(100, (reps / goal) * 100);
+  const batches = Math.ceil(goal / BATCH_SIZE);
+  const fullBatches = Math.floor(reps / BATCH_SIZE);
+  const partial = reps % BATCH_SIZE;
+
+  const card = document.getElementById('card-' + id);
+  if (!card) return;
+
+  card.querySelector('.rep-count').textContent = reps;
+  card.querySelector('.rep-goal').textContent = '/ ' + goal;
+  card.querySelector('.prog-bar').style.width = pct + '%';
+
+  const batchRow = card.querySelector('.batch-row');
+  batchRow.innerHTML = '';
+  for (let i = 0; i < batches; i++) {
+    const b = document.createElement('div');
+    b.className = 'batch';
+    if (i < fullBatches) b.classList.add(ex.bg);
+    else if (i === fullBatches && partial > 0) {
+      b.classList.add(ex.bg);
+      b.style.opacity = (partial / BATCH_SIZE).toFixed(2);
+    } else {
+      b.classList.add('bg-zinc-700');
+    }
+    batchRow.appendChild(b);
+  }
+}
+
+function render() {
+  document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('goalInput').value = state.goal;
+
+  const container = document.getElementById('cards');
+  container.innerHTML = '';
+
+  EXERCISES.forEach(ex => {
+    const reps = state.reps[ex.id];
+    const goal = state.goal;
+    const pct = Math.min(100, (reps / goal) * 100);
+    const batches = Math.ceil(goal / BATCH_SIZE);
+
+    const card = document.createElement('div');
+    card.id = 'card-' + ex.id;
+    card.className = `rounded-2xl bg-zinc-900 border ${ex.border} p-5 ring-1 ${ex.ring}`;
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-semibold text-zinc-100 text-base">${ex.name}</span>
+        <div class="flex items-baseline gap-1">
+          <span class="rep-count text-2xl font-bold ${ex.text}">${reps}</span>
+          <span class="rep-goal text-zinc-500 text-sm">/ ${goal}</span>
+        </div>
+      </div>
+      <div class="batch-row flex gap-1 flex-wrap mb-3"></div>
+      <div class="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden">
+        <div class="prog-bar h-1.5 ${ex.bg} rounded-full progress-bar" style="width:${pct}%"></div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="addReps('${ex.id}', 1)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+1</button>
+        <button onclick="addReps('${ex.id}', 5)"  class="btn-press flex-1 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-colors">+5</button>
+        <button onclick="addReps('${ex.id}', 10)" class="btn-press flex-1 py-2.5 rounded-xl ${ex.bg} text-white text-sm font-bold hover:opacity-90 transition-opacity">+10</button>
+        <button onclick="addReps('${ex.id}', -1)" class="btn-press px-3 py-2.5 rounded-xl bg-zinc-800 text-zinc-500 text-sm hover:bg-zinc-700 transition-colors">−</button>
+      </div>
+    `;
+    container.appendChild(card);
+    renderCard(ex.id);
+  });
+
+  updateTopBar();
+}
+
+// Stats
+function openStats() {
+  const content = document.getElementById('statsContent');
+  content.innerHTML = '';
+  EXERCISES.forEach(ex => {
+    const reps = state.reps[ex.id];
+    const pct = Math.min(100, Math.round((reps / state.goal) * 100));
+    content.innerHTML += `
+      <div class="flex items-center justify-between">
+        <span class="text-zinc-300 text-sm">${ex.name}</span>
+        <div class="flex items-center gap-3">
+          <div class="w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div class="h-1.5 ${ex.bg} rounded-full" style="width:${pct}%"></div>
+          </div>
+          <span class="${ex.text} text-sm font-semibold w-8 text-right">${reps}</span>
+        </div>
+      </div>`;
+  });
+  document.getElementById('statsModal').classList.remove('hidden');
+}
+function closeStats() { document.getElementById('statsModal').classList.add('hidden'); }
+
+// Settings
+function openSettings() {
+  document.getElementById('goalInput').value = state.goal;
+  updateNotifBtn();
+  document.getElementById('settingsModal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+function saveGoal() {
+  const v = parseInt(document.getElementById('goalInput').value);
+  if (v > 0) { state.goal = v; save(); render(); closeSettings(); }
+}
+
+// Notifications
+function updateNotifBtn() {
+  const btn = document.getElementById('notifBtn');
+  if (Notification.permission === 'granted') {
+    btn.textContent = '✓ Notifications Enabled';
+    btn.classList.add('text-emerald-400');
+  } else if (Notification.permission === 'denied') {
+    btn.textContent = 'Notifications Blocked — Enable in Settings';
+    btn.classList.add('text-rose-400');
+  }
+}
+
+function requestNotifications() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(p => {
+    if (p === 'granted') {
+      state.notifs = true; save();
+      new Notification('SassiFit', { body: "Reminders on. No more excuses.", icon: '' });
+    }
+    updateNotifBtn();
+  });
+}
+
+function checkReminders() {
+  if (Notification.permission !== 'granted') return;
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  if (REMINDER_HOURS.includes(h) && m === 0) {
+    const total = EXERCISES.reduce((s, e) => s + state.reps[e.id], 0);
+    const max = EXERCISES.length * state.goal;
+    if (total < max) {
+      const msg = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+      new Notification('SassiFit', { body: msg });
+    }
+  }
+}
+
+// Init
+render();
+updateNotifBtn();
+setInterval(checkReminders, 60000);
+</script>
 </body>
 </html>

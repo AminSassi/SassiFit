@@ -1,17 +1,9 @@
 const DEFAULT_EXERCISES = [
-  { id: 'pushups', name: 'Push-ups', color: 'green', c: 'c-green', bg: 'bg-green' },
-  { id: 'situps',  name: 'Sit-ups',  color: 'red',   c: 'c-red',   bg: 'bg-red'   },
-  { id: 'pullups', name: 'Pull-ups', color: 'amber', c: 'c-amber', bg: 'bg-amber' },
-  { id: 'squats',  name: 'Squats',   color: 'blue',  c: 'c-blue',  bg: 'bg-blue'  },
+  { id: 'pushups', name: 'Push-ups', icon: '💪', sub: 'Upper body strength', colorClass: 'pushups' },
+  { id: 'situps',  name: 'Sit-ups',  icon: '🔥', sub: 'Core workout', colorClass: 'situps' },
+  { id: 'pullups', name: 'Pull-ups', icon: '🏋️', sub: 'Back & arms', colorClass: 'pullups' },
+  { id: 'squats',  name: 'Squats',   icon: '🦵', sub: 'Lower body power', colorClass: 'squats' },
 ];
-
-const COLORS = ['green', 'red', 'amber', 'blue'];
-const COLOR_MAP = {
-  green: { c: 'c-green', bg: 'bg-green' },
-  red:   { c: 'c-red',   bg: 'bg-red'   },
-  amber: { c: 'c-amber', bg: 'bg-amber' },
-  blue:  { c: 'c-blue',  bg: 'bg-blue'  },
-};
 
 const REMINDER_MESSAGES = [
   "Get off the couch. Now.",
@@ -75,7 +67,7 @@ function getExercises() {
 
 function addReps(id, n) {
   state.reps[id] = Math.max(0, (state.reps[id] || 0) + n);
-  save(); renderCard(id); updateTopBar(); haptic();
+  save(); renderCard(id); haptic();
   checkExerciseComplete(id);
   checkDayComplete();
 }
@@ -97,12 +89,10 @@ function checkExerciseComplete(id) {
     state.completedExercises[id] = true;
     save();
     showExerciseCompleteToast(id);
-    glowCard(id);
     hapticSuccess();
   } else if (reps < goal && wasComplete) {
     if (state.completedExercises) delete state.completedExercises[id];
     save();
-    unglowCard(id);
   }
 }
 
@@ -126,16 +116,6 @@ function showToast(msg) {
   }, 2000);
 }
 
-function glowCard(id) {
-  const card = document.getElementById('card-' + id);
-  if (card) card.classList.add('card-complete');
-}
-
-function unglowCard(id) {
-  const card = document.getElementById('card-' + id);
-  if (card) card.classList.remove('card-complete');
-}
-
 function checkDayComplete() {
   const exercises = getExercises();
   const total = exercises.reduce((s, e) => s + (state.reps[e.id] || 0), 0);
@@ -150,7 +130,7 @@ function checkDayComplete() {
     }
     state.streak = calculateStreak();
     save();
-    showToast('Daily goal achieved!');
+    showToast('Daily goal achieved! 🎉');
   }
 }
 
@@ -174,18 +154,9 @@ function calculateStreak() {
 }
 
 function resetAll() {
-  getExercises().forEach(e => {
-    state.reps[e.id] = 0;
-    unglowCard(e.id);
-  });
+  getExercises().forEach(e => state.reps[e.id] = 0);
   state.completedExercises = {};
   save(); render();
-}
-
-function updateTopBar() {
-  const total = getExercises().reduce((s, e) => s + (state.reps[e.id] || 0), 0);
-  const goal = getExercises().length * state.goal;
-  document.getElementById('topBar').style.width = Math.min(100, (total / goal) * 100) + '%';
 }
 
 function renderCard(id) {
@@ -193,83 +164,100 @@ function renderCard(id) {
   if (!ex) return;
   const reps = state.reps[id] || 0;
   const goal = state.goal;
-  const pct = Math.min(100, (reps / goal) * 100);
+  const pct = Math.min(100, Math.round((reps / goal) * 100));
   const remaining = Math.max(0, goal - reps);
+  const isComplete = reps >= goal;
   const card = document.getElementById('card-' + id);
   if (!card) return;
   card.querySelector('.rep-count').textContent = reps;
   card.querySelector('.rep-goal').textContent = '/ ' + goal;
-  card.querySelector('.prog-bar').style.width = pct + '%';
-  const remainingEl = card.querySelector('.rep-remaining');
-  if (remainingEl) {
-    if (reps >= goal) {
-      remainingEl.textContent = 'Goal completed!';
-      remainingEl.classList.add('completed');
+  card.querySelector('.ex-progress-bar').style.width = pct + '%';
+  card.querySelector('.ex-pct').textContent = pct + '%';
+  const badge = card.querySelector('.ex-badge');
+  if (badge) {
+    if (isComplete) {
+      badge.textContent = '✓ Complete';
+      badge.className = 'ex-badge badge-complete';
     } else {
-      remainingEl.textContent = remaining + ' reps remaining';
-      remainingEl.classList.remove('completed');
+      badge.className = 'ex-badge badge-active';
+      badge.textContent = '';
     }
   }
-  const batchRow = card.querySelector('.batch-row');
-  const batches = Math.ceil(goal / BATCH_SIZE);
-  const full = Math.floor(reps / BATCH_SIZE);
-  const partial = reps % BATCH_SIZE;
-  batchRow.innerHTML = '';
-  for (let i = 0; i < batches; i++) {
-    const b = document.createElement('div');
-    b.className = 'batch';
-    if (i < full) { b.classList.add(ex.bg); }
-    else if (i === full && partial > 0) { b.classList.add(ex.bg); b.style.opacity = (partial / BATCH_SIZE).toFixed(2); }
-    batchRow.appendChild(b);
+  const remainingEl = card.querySelector('.remaining-text');
+  if (remainingEl) {
+    if (isComplete) {
+      remainingEl.textContent = 'Goal completed!';
+      remainingEl.classList.add('done');
+    } else {
+      remainingEl.textContent = remaining + ' reps remaining';
+      remainingEl.classList.remove('done');
+    }
+  }
+  if (isComplete) {
+    card.classList.add('card-complete');
+  } else {
+    card.classList.remove('card-complete');
   }
 }
 
 function render() {
-  document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  document.getElementById('goalInput').value = state.goal;
+  const exercises = getExercises();
   const container = document.getElementById('cards');
   container.innerHTML = '';
-  getExercises().forEach(ex => {
+  exercises.forEach(ex => {
     const card = document.createElement('div');
     card.id = 'card-' + ex.id;
-    card.className = 'card';
-    if (state.completedExercises && state.completedExercises[ex.id]) card.classList.add('card-complete');
+    card.className = 'exercise-card-wrap';
     card.innerHTML = `
-      <div class="card-top">
-        <span class="ex-name">${ex.name}</span>
+      <div class="exercise-card ${ex.colorClass}">
+        <div class="ex-icon ${ex.colorClass}">${ex.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-sub">${ex.sub}</div>
+          <div class="ex-progress-wrap">
+            <div class="ex-progress"><div class="ex-progress-bar ${ex.colorClass}"></div></div>
+            <span class="ex-pct">0%</span>
+          </div>
+        </div>
         <div class="rep-display">
-          <span class="rep-count ${ex.c}">0</span>
+          <span class="rep-count">0</span>
           <span class="rep-goal">/ ${state.goal}</span>
         </div>
+        <span class="ex-badge badge-active"></span>
       </div>
-      <div class="rep-remaining"></div>
-      <div class="batch-row"></div>
-      <div class="prog-wrap"><div class="prog-bar ${ex.bg}"></div></div>
-      <div class="btn-row">
-        <button class="btn" onclick="addReps('${ex.id}',1)">+1</button>
-        <button class="btn" onclick="addReps('${ex.id}',5)">+5</button>
-        <button class="btn btn-primary" onclick="addReps('${ex.id}',10)">+10</button>
-        <button class="btn btn-quick" onclick="addReps('${ex.id}',50)">+50</button>
-        <button class="btn btn-minus" onclick="addReps('${ex.id}',-1)">−</button>
+      <div class="remaining-text"></div>
+      <div class="ex-actions">
+        <button class="ex-btn" onclick="addReps('${ex.id}',1)">+1</button>
+        <button class="ex-btn" onclick="addReps('${ex.id}',5)">+5</button>
+        <button class="ex-btn ex-btn-primary" onclick="addReps('${ex.id}',10)">+10</button>
+        <button class="ex-btn ex-btn-quick" onclick="addReps('${ex.id}',50)">+50</button>
+        <button class="ex-btn ex-btn-minus" onclick="addReps('${ex.id}',-1)">−</button>
       </div>`;
     container.appendChild(card);
     renderCard(ex.id);
   });
-  updateTopBar();
   renderStreak();
+  updateGreeting();
 }
 
 function renderStreak() {
-  const streakEl = document.getElementById('streakBadge');
-  if (streakEl) {
-    const streak = calculateStreak();
-    if (streak > 0) {
-      streakEl.textContent = streak + ' day streak';
-      streakEl.style.display = 'block';
-    } else {
-      streakEl.style.display = 'none';
-    }
+  const banner = document.getElementById('streakBanner');
+  const text = document.getElementById('streakText');
+  const streak = calculateStreak();
+  if (streak > 0) {
+    text.textContent = streak + ' day streak — keep it up!';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
   }
+}
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  const el = document.querySelector('.greeting');
+  if (h < 12) el.textContent = 'Good Morning 🔥';
+  else if (h < 17) el.textContent = 'Good Afternoon 💪';
+  else el.textContent = 'Good Evening 🌙';
 }
 
 function openStats() {
@@ -277,20 +265,23 @@ function openStats() {
   content.innerHTML = '';
   const streak = calculateStreak();
   if (streak > 0) {
-    content.innerHTML += `<div class="stat-row"><span class="stat-name">Streak</span><span class="stat-num" style="color:#f59e0b">${streak} days</span></div>`;
+    content.innerHTML += `<div class="stat-row"><span class="stat-name">🔥 Streak</span><span class="stat-num" style="color:var(--accent)">${streak} days</span></div>`;
   }
-  getExercises().forEach(ex => {
+  const exercises = getExercises();
+  const total = exercises.reduce((s, e) => s + (state.reps[e.id] || 0), 0);
+  const goal = exercises.length * state.goal;
+  const overallPct = Math.min(100, Math.round((total / goal) * 100));
+  content.innerHTML += `<div class="stat-row"><span class="stat-name">Today's Progress</span><span class="stat-num">${overallPct}%</span></div>`;
+  exercises.forEach(ex => {
     const reps = state.reps[ex.id] || 0;
     const pct = Math.min(100, Math.round((reps / state.goal) * 100));
-    const remaining = Math.max(0, state.goal - reps);
-    const status = reps >= state.goal ? '✓' : remaining + ' left';
     const row = document.createElement('div');
     row.className = 'stat-row';
     row.innerHTML = `
-      <span class="stat-name">${ex.name}</span>
-      <div class="stat-right">
-        <div class="stat-bar-wrap"><div class="stat-bar ${ex.bg}" style="width:${pct}%"></div></div>
-        <span class="stat-num ${ex.c}">${reps}</span>
+      <span class="stat-name">${ex.icon} ${ex.name}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="stat-bar-wrap"><div class="stat-bar ex-progress-bar ${ex.colorClass}" style="width:${pct}%"></div></div>
+        <span class="stat-num">${reps}</span>
       </div>`;
     content.appendChild(row);
   });
@@ -298,7 +289,7 @@ function openStats() {
   if (history.length > 0) {
     content.innerHTML += `<p class="setting-label" style="margin-top:20px">Recent Activity</p>`;
     history.slice(-7).reverse().forEach(date => {
-      content.innerHTML += `<div class="stat-row"><span class="stat-name">${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span class="stat-num" style="color:#30d158">✓</span></div>`;
+      content.innerHTML += `<div class="stat-row"><span class="stat-name">${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span class="stat-num" style="color:var(--accent)">✓</span></div>`;
     });
   }
   document.getElementById('statsModal').classList.add('open');
@@ -324,10 +315,8 @@ function renderCustomExercises() {
   list.innerHTML = '';
   (state.customExercises || []).forEach(ex => {
     const row = document.createElement('div');
-    row.className = 'stat-row';
-    row.innerHTML = `
-      <span class="stat-name">${ex.name}</span>
-      <button class="btn btn-minus" style="flex:0 0 auto;padding:6px 12px;font-size:12px;color:#ff375f" onclick="removeCustomExercise('${ex.id}')">Remove</button>`;
+    row.className = 'custom-list-item';
+    row.innerHTML = `<span style="font-size:14px;font-weight:700;color:var(--gray2)">${ex.name}</span><button class="remove-btn" onclick="removeCustomExercise('${ex.id}')">Remove</button>`;
     list.appendChild(row);
   });
 }
@@ -337,8 +326,7 @@ function addCustomExercise() {
   const name = nameInput.value.trim();
   if (!name) return;
   const id = 'custom_' + Date.now();
-  const color = COLORS[(state.customExercises || []).length % COLORS.length];
-  const exercise = { id, name, color, ...COLOR_MAP[color] };
+  const exercise = { id, name, icon: '⭐', sub: 'Custom exercise', colorClass: 'custom' };
   if (!state.customExercises) state.customExercises = [];
   state.customExercises.push(exercise);
   state.reps[id] = 0;
@@ -356,30 +344,58 @@ function removeCustomExercise(id) {
   render();
 }
 
+function openAddExercise() {
+  document.getElementById('addExerciseModal').classList.add('open');
+}
+function closeAddExercise() {
+  document.getElementById('addExerciseModal').classList.remove('open');
+}
+
+function addNewExercise() {
+  const input = document.getElementById('newExerciseInput');
+  const name = input.value.trim();
+  if (!name) return;
+  const id = 'custom_' + Date.now();
+  const exercise = { id, name, icon: '⭐', sub: 'Custom exercise', colorClass: 'custom' };
+  if (!state.customExercises) state.customExercises = [];
+  state.customExercises.push(exercise);
+  state.reps[id] = 0;
+  save();
+  input.value = '';
+  closeAddExercise();
+  render();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (tab === 'home') {
+    document.querySelector('.nav-item').classList.add('active');
+  }
+}
+
 function updateNotifBtn() {
   const btn = document.getElementById('notifBtn');
   const notifInfo = document.getElementById('notifInfo');
   if (!('Notification' in window)) {
     btn.textContent = 'Notifications Not Supported';
-    btn.style.color = '#ff375f';
+    btn.style.color = 'var(--red)';
     if (notifInfo) notifInfo.textContent = 'Your browser does not support notifications.';
     return;
   }
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS && !window.navigator.standalone) {
-    if (notifInfo) notifInfo.textContent = 'On iPhone, install SassiFit to your Home Screen for reminders to work.';
+    if (notifInfo) notifInfo.textContent = 'On iPhone, install SassiFit to your Home Screen for reminders.';
   }
   if (Notification.permission === 'granted') {
     btn.textContent = '✓ Reminders Enabled';
     btn.style.color = '#30d158';
-    if (notifInfo) notifInfo.textContent = 'You\'ll get reminders at 8AM, 12PM, 6PM, 9PM when the app is open.';
+    if (notifInfo) notifInfo.textContent = 'Reminders at 8AM, 12PM, 6PM, 9PM when app is open.';
   } else if (Notification.permission === 'denied') {
     btn.textContent = 'Blocked — Enable in Settings';
-    btn.style.color = '#ff375f';
-    if (notifInfo) notifInfo.textContent = 'Notifications blocked. Enable them in your browser settings.';
+    btn.style.color = 'var(--red)';
+    if (notifInfo) notifInfo.textContent = 'Notifications blocked. Enable in browser settings.';
   } else {
     btn.textContent = 'Enable Notifications';
-    btn.style.color = 'rgba(235,235,245,0.75)';
     if (notifInfo) notifInfo.textContent = '';
   }
 }

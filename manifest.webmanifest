@@ -1,0 +1,19 @@
+{
+  "name": "SassiFit",
+  "short_name": "SassiFit",
+  "description": "Track your daily exercise goals",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F5F5",
+  "theme_color": "#192126",
+  "lang": "en",
+  "scope": "/",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

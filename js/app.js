@@ -237,6 +237,7 @@ function render() {
     renderCard(ex.id);
   });
   renderStreak();
+  renderCalendar();
   updateGreeting();
 }
 
@@ -250,6 +251,42 @@ function renderStreak() {
   } else {
     banner.style.display = 'none';
   }
+}
+
+function renderCalendar() {
+  const container = document.getElementById('calendarContainer');
+  if (!container) return;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const history = state.history || [];
+  let html = `<div class="calendar-header"><span class="calendar-month">${monthName}</span></div>`;
+  html += '<div class="calendar-grid">';
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  days.forEach(d => { html += `<div class="calendar-day-label">${d}</div>`; });
+  for (let i = 0; i < firstDay; i++) {
+    html += '<div class="calendar-day empty"></div>';
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = new Date(year, month, d).toDateString();
+    const isToday = d === today;
+    const isActive = history.includes(dateStr);
+    let cls = 'calendar-day';
+    if (isToday) cls += ' today';
+    if (isActive) cls += ' active';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  html += '</div>';
+  const completedDays = history.filter(d => {
+    const dt = new Date(d);
+    return dt.getMonth() === month && dt.getFullYear() === year;
+  }).length;
+  html += `<div class="calendar-stats"><span>${completedDays} / ${daysInMonth} days completed</span></div>`;
+  container.innerHTML = html;
 }
 
 function updateGreeting() {

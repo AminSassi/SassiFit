@@ -1,7 +1,7 @@
 const EX=[{id:'pushups',name:'Push-ups'},{id:'situps',name:'Sit-ups'},{id:'pullups',name:'Pull-ups'},{id:'squats',name:'Squats'}];
 const MSG=["Get off the couch.","Your muscles are waiting.","No excuses.","Every rep counts.","Time to sweat."];
 const HOURS=[8,12,18,21];
-const RING=339.3;
+const RING=389.6;
 let S=load();
 
 function load(){
@@ -50,8 +50,22 @@ function toast(m){const o=document.querySelector('.toast');if(o)o.remove();const
 function render(){
   const e=all(),tot=e.reduce((s,x)=>s+(S.reps[x.id]||0),0),g=e.length*S.goal,pct=Math.min(100,Math.round(tot/g*100)),rem=Math.max(0,g-tot),done=tot>=g;
   const h=new Date().getHours();document.getElementById('greeting').textContent=h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening';
-  if(done){document.getElementById('heroProgress').style.display='none';document.getElementById('heroDone').style.display=''}
-  else{document.getElementById('heroProgress').style.display='';document.getElementById('heroDone').style.display='none';document.getElementById('ring').style.strokeDashoffset=RING-RING*pct/100;document.getElementById('ringPct').textContent=pct+'%';document.getElementById('heroRemaining').textContent=rem+' left'}
+  if(done){
+    document.getElementById('ring').style.strokeDashoffset='0';
+    document.getElementById('ringPct').style.opacity='0';
+    document.getElementById('ringCheck').classList.add('show');
+    document.getElementById('heroRemaining').style.display='none';
+    setTimeout(()=>{document.getElementById('heroProgress').style.display='none';document.getElementById('heroDone').style.display=''},400);
+  } else {
+    document.getElementById('heroProgress').style.display='';
+    document.getElementById('heroDone').style.display='none';
+    document.getElementById('ringCheck').classList.remove('show');
+    document.getElementById('ringPct').style.opacity='1';
+    document.getElementById('heroRemaining').style.display='';
+    document.getElementById('ring').style.strokeDashoffset=RING-RING*pct/100;
+    document.getElementById('ringPct').textContent=pct+'%';
+    document.getElementById('heroRemaining').textContent=rem+' left';
+  }
   const s=streak(S.hist||[]),sl=document.getElementById('streak');
   if(s>0){document.getElementById('streakText').textContent='🔥 '+s+' day streak';sl.style.display=''}else sl.style.display='none';
   const c=document.getElementById('cards');c.innerHTML='';

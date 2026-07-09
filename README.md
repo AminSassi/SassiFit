@@ -2,7 +2,11 @@
 
 Minimalist daily bodyweight habit tracker. Offline-first. No accounts. No subscriptions.
 
-Build consistency with small daily workouts. Open the app, log your reps, close it. That's it.
+## Why SassiFit?
+
+SassiFit isn't a workout planner or calorie tracker. It's a minimalist habit tracker for people who want to stay active with small bodyweight workouts throughout the day. Everything runs locally on your device—no account, no subscription, no cloud.
+
+Most fitness apps try to replace the gym. SassiFit replaces the excuse of "I'll do it later."
 
 ## Features
 

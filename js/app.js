@@ -79,7 +79,8 @@ function render(){
 
 function renderTimeline(){
   const w=document.getElementById('timeline'),tl=S.tl||[];
-  if(tl.length===0){w.innerHTML='';return}
+  if(tl.length===0){w.style.display='none';return}
+  w.style.display='';
   let h='<p class="timeline-title">Timeline</p>';
   tl.slice().reverse().forEach(e=>{h+=`<div class="tl-item"><span class="tl-time">${e.t}</span><span class="tl-dot"></span><span class="tl-ex">${e.nm}</span><span class="tl-reps">+${e.n}</span></div>`});
   w.innerHTML=h;

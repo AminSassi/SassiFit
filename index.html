@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#192126" />
+  <meta name="theme-color" content="#1B1B1B" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
@@ -15,38 +15,54 @@
 </head>
 <body>
 
-  <header>
-    <p class="greeting">Good Morning 🔥</p>
-    <h1 class="app-title">SassiFit</h1>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="openHistory()" aria-label="History">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </button>
-      <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
+  <div class="app">
+    <header>
+      <p class="greeting" id="greeting">Good Morning</p>
+      <div class="header-row">
+        <h1 class="app-title">SassiFit</h1>
+        <div class="header-btns">
+          <button class="icon-btn" onclick="openHistory()" aria-label="History">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
+          <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div id="heroSection" class="hero">
+      <div id="heroContent">
+        <div class="hero-progress-ring" id="progressRing">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+            <circle id="progressCircle" cx="60" cy="60" r="52" fill="none" stroke="#BBF246" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" transform="rotate(-90 60 60)"/>
+          </svg>
+          <span class="hero-pct" id="heroPct">0%</span>
+        </div>
+        <div class="hero-text">
+          <p class="hero-label">Today's Progress</p>
+          <p class="hero-remaining" id="heroRemaining">0 reps remaining</p>
+        </div>
+      </div>
+      <div id="heroComplete" class="hero-complete" style="display:none">
+        <span class="hero-emoji">🎉</span>
+        <p class="hero-complete-title">Daily Goal Complete</p>
+        <p class="hero-complete-sub">Come back tomorrow to keep your streak alive.</p>
+      </div>
+      <div class="streak-line" id="streakLine" style="display:none">
+        <span>🔥</span> <span id="streakText"></span>
+      </div>
     </div>
-  </header>
 
-  <main>
-    <div id="streakBanner" class="streak-banner" style="display:none">
-      <span class="streak-icon">🔥</span>
-      <span class="streak-text" id="streakText"></span>
-    </div>
+    <div class="exercises" id="exercises"></div>
 
-    <p class="section-title">Today Plan</p>
-    <div id="cards"></div>
-
-    <button class="btn-add-exercise" onclick="openAddExercise()">+ Add Exercise</button>
     <button class="btn-reset" onclick="resetAll()">Reset Day</button>
-
-    <p class="section-title" style="margin-top:8px">Today Timeline</p>
-    <div id="timeline" class="timeline-wrap"></div>
-  </main>
+  </div>
 
   <!-- History modal -->
   <div id="historyModal" class="modal-backdrop" onclick="if(event.target===this)closeHistory()">
-    <div class="modal-sheet modal-sheet-tall">
+    <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">History</div>
       <div id="historyContent"></div>
@@ -62,13 +78,6 @@
       <p class="setting-label">Notifications</p>
       <button id="notifBtn" class="notif-btn" onclick="requestNotifications()">Enable Reminders</button>
       <p id="notifInfo" class="notif-info"></p>
-      <p class="setting-label">Reminder Times</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(0,0,0,0.04);color:var(--gray2)">8:00 AM</span>
-        <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(0,0,0,0.04);color:var(--gray2)">12:00 PM</span>
-        <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(0,0,0,0.04);color:var(--gray2)">6:00 PM</span>
-        <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(0,0,0,0.04);color:var(--gray2)">9:00 PM</span>
-      </div>
       <p class="setting-label">Daily Goal</p>
       <div class="goal-row">
         <input id="goalInput" class="goal-input" type="number" min="1" max="500" />
@@ -76,24 +85,11 @@
       </div>
       <p class="setting-label">Custom Exercises</p>
       <div class="goal-row">
-        <input id="customExerciseInput" class="goal-input" type="text" placeholder="Exercise name" />
-        <button class="save-btn" onclick="addCustomExercise()">Add</button>
+        <input id="customInput" class="goal-input" type="text" placeholder="Exercise name" />
+        <button class="save-btn" onclick="addCustom()">Add</button>
       </div>
-      <div id="customExercisesList"></div>
+      <div id="customList"></div>
       <button class="modal-close" onclick="closeSettings()">Done</button>
-    </div>
-  </div>
-
-  <!-- Add Exercise modal -->
-  <div id="addExerciseModal" class="modal-backdrop" onclick="if(event.target===this)closeAddExercise()">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Add Exercise</div>
-      <div class="goal-row">
-        <input id="newExerciseInput" class="goal-input" type="text" placeholder="Exercise name" />
-        <button class="save-btn" onclick="addNewExercise()">Add</button>
-      </div>
-      <button class="modal-close" onclick="closeAddExercise()">Cancel</button>
     </div>
   </div>
 

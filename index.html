@@ -62,6 +62,8 @@
 
     <section class="timeline" id="timeline"></section>
 
+    <button class="btn-reset" onclick="resetAll()">Reset Day</button>
+
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="announce"></div>
   </div>
 
@@ -102,5 +104,10 @@
   </div>
 
   <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/SassiFit/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

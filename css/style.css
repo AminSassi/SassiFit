@@ -89,6 +89,15 @@ header{padding:60px 0 0}
 .hm-day.on{background:var(--accent)}
 .hm-day.now{box-shadow:inset 0 0 0 2px var(--text)}
 
+.timeline{margin-top:16px;padding:18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.timeline-title{font-size:12px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.tl-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px}
+.tl-item:last-child{border-bottom:none}
+.tl-time{color:var(--dim);font-weight:500;min-width:60px}
+.tl-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.tl-ex{font-weight:600;flex:1}
+.tl-reps{font-weight:800;color:var(--accent)}
+
 .empty{text-align:center;padding:32px 0;color:var(--dim);font-size:15px;font-weight:500}
 
 .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:700;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:300;opacity:0;transition:opacity .22s ease-out,transform .22s ease-out;pointer-events:none}

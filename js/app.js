@@ -59,6 +59,15 @@ function render(){
   e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal,left=Math.max(0,S.goal-r);const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><p class="card-left">${d?'Completed':left+' left'}</p><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button></div>`;c.appendChild(el)});
   const sm=document.getElementById('summaryRows');sm.innerHTML='';e.forEach(x=>{const r=S.reps[x.id]||0;sm.innerHTML+=`<div class="sum-row"><span class="sum-ex">${x.name}</span><span class="sum-val">${r}</span></div>`});
   document.getElementById('summaryTotal').innerHTML=`<span>Total</span><b>${tot} reps</b>`;
+  renderTimeline();
+}
+
+function renderTimeline(){
+  const w=document.getElementById('timeline'),tl=S.tl||[];
+  if(tl.length===0){w.innerHTML='';return}
+  let h='<p class="timeline-title">Timeline</p>';
+  tl.slice().reverse().forEach(e=>{h+=`<div class="tl-item"><span class="tl-time">${e.t}</span><span class="tl-dot"></span><span class="tl-ex">${e.nm}</span><span class="tl-reps">+${e.n}</span></div>`});
+  w.innerHTML=h;
 }
 
 function openHistory(){

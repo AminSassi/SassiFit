@@ -13,10 +13,8 @@ const REMINDER_MESSAGES = [
   "Time to sweat. You know what to do.",
 ];
 const REMINDER_HOURS = [8, 12, 18, 21];
-const BATCH_SIZE = 10;
 
 let state = load();
-let lastCompletedExercises = {};
 
 function load() {
   const today = new Date().toDateString();
@@ -36,11 +34,16 @@ function load() {
       streak: saved.streak || 0,
       lastCompleteDate: saved.lastCompleteDate || null,
       completedExercises: {},
+      timeline: [],
+      bestStreak: saved.bestStreak || 0,
+      mostRepsDay: saved.mostRepsDay || 0,
+      daysCompleted: saved.daysCompleted || 0,
     };
     saveHistoryIfNeeded(saved);
     return newState;
   }
   if (!saved.completedExercises) saved.completedExercises = {};
+  if (!saved.timeline) saved.timeline = [];
   return saved;
 }
 
@@ -53,7 +56,7 @@ function saveHistoryIfNeeded(prev) {
     const history = prev.history || [];
     if (!history.includes(prev.date)) {
       history.push(prev.date);
-      if (history.length > 30) history.shift();
+      if (history.length > 365) history.shift();
       localStorage.setItem('sassifit', JSON.stringify({ ...prev, history }));
     }
   }
@@ -67,9 +70,17 @@ function getExercises() {
 
 function addReps(id, n) {
   state.reps[id] = Math.max(0, (state.reps[id] || 0) + n);
-  save(); renderCard(id); haptic();
+  if (n > 0) {
+    const ex = getExercises().find(e => e.id === id);
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    state.timeline.push({ time, ex: ex ? ex.name : id, reps: n, ts: now.getTime() });
+    if (state.timeline.length > 50) state.timeline.shift();
+  }
+  save(); renderCard(id); renderTimeline(); haptic();
   checkExerciseComplete(id);
   checkDayComplete();
+  updateRecords();
 }
 
 function haptic() {
@@ -125,13 +136,21 @@ function checkDayComplete() {
     const history = state.history || [];
     if (!history.includes(state.date)) {
       history.push(state.date);
-      if (history.length > 30) history.shift();
+      if (history.length > 365) history.shift();
       state.history = history;
+      state.daysCompleted = (state.daysCompleted || 0) + 1;
     }
     state.streak = calculateStreak();
+    if (state.streak > (state.bestStreak || 0)) state.bestStreak = state.streak;
     save();
     showToast('Daily goal achieved! 🎉');
   }
+}
+
+function updateRecords() {
+  const total = getExercises().reduce((s, e) => s + (state.reps[e.id] || 0), 0);
+  if (total > (state.mostRepsDay || 0)) state.mostRepsDay = total;
+  save();
 }
 
 function calculateStreak() {
@@ -156,6 +175,7 @@ function calculateStreak() {
 function resetAll() {
   getExercises().forEach(e => state.reps[e.id] = 0);
   state.completedExercises = {};
+  state.timeline = [];
   save(); render();
 }
 
@@ -237,7 +257,7 @@ function render() {
     renderCard(ex.id);
   });
   renderStreak();
-  renderCalendar();
+  renderTimeline();
   updateGreeting();
 }
 
@@ -253,40 +273,25 @@ function renderStreak() {
   }
 }
 
-function renderCalendar() {
-  const container = document.getElementById('calendarContainer');
+function renderTimeline() {
+  const container = document.getElementById('timeline');
   if (!container) return;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const today = now.getDate();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const history = state.history || [];
-  let html = `<div class="calendar-header"><span class="calendar-month">${monthName}</span></div>`;
-  html += '<div class="calendar-grid">';
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  days.forEach(d => { html += `<div class="calendar-day-label">${d}</div>`; });
-  for (let i = 0; i < firstDay; i++) {
-    html += '<div class="calendar-day empty"></div>';
+  const timeline = state.timeline || [];
+  if (timeline.length === 0) {
+    container.innerHTML = '<div class="timeline-empty">No reps logged yet today</div>';
+    return;
   }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = new Date(year, month, d).toDateString();
-    const isToday = d === today;
-    const isActive = history.includes(dateStr);
-    let cls = 'calendar-day';
-    if (isToday) cls += ' today';
-    if (isActive) cls += ' active';
-    html += `<div class="${cls}">${d}</div>`;
-  }
-  html += '</div>';
-  const completedDays = history.filter(d => {
-    const dt = new Date(d);
-    return dt.getMonth() === month && dt.getFullYear() === year;
-  }).length;
-  html += `<div class="calendar-stats"><span>${completedDays} / ${daysInMonth} days completed</span></div>`;
-  container.innerHTML = html;
+  container.innerHTML = '';
+  timeline.slice().reverse().forEach(entry => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.innerHTML = `
+      <span class="timeline-time">${entry.time}</span>
+      <span class="timeline-dot"></span>
+      <span class="timeline-ex">${entry.ex}</span>
+      <span class="timeline-reps">+${entry.reps}</span>`;
+    container.appendChild(item);
+  });
 }
 
 function updateGreeting() {
@@ -297,41 +302,68 @@ function updateGreeting() {
   else el.textContent = 'Good Evening 🌙';
 }
 
-function openStats() {
-  const content = document.getElementById('statsContent');
+function openHistory() {
+  const content = document.getElementById('historyContent');
   content.innerHTML = '';
-  const streak = calculateStreak();
-  if (streak > 0) {
-    content.innerHTML += `<div class="stat-row"><span class="stat-name">🔥 Streak</span><span class="stat-num" style="color:var(--accent)">${streak} days</span></div>`;
-  }
-  const exercises = getExercises();
-  const total = exercises.reduce((s, e) => s + (state.reps[e.id] || 0), 0);
-  const goal = exercises.length * state.goal;
-  const overallPct = Math.min(100, Math.round((total / goal) * 100));
-  content.innerHTML += `<div class="stat-row"><span class="stat-name">Today's Progress</span><span class="stat-num">${overallPct}%</span></div>`;
-  exercises.forEach(ex => {
-    const reps = state.reps[ex.id] || 0;
-    const pct = Math.min(100, Math.round((reps / state.goal) * 100));
-    const row = document.createElement('div');
-    row.className = 'stat-row';
-    row.innerHTML = `
-      <span class="stat-name">${ex.icon} ${ex.name}</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="stat-bar-wrap"><div class="stat-bar ex-progress-bar ${ex.colorClass}" style="width:${pct}%"></div></div>
-        <span class="stat-num">${reps}</span>
-      </div>`;
-    content.appendChild(row);
-  });
+
+  const bestStreak = state.bestStreak || 0;
+  const currentStreak = calculateStreak();
+  const mostReps = state.mostRepsDay || 0;
+  const daysCompleted = state.daysCompleted || 0;
+  const totalDays = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / 86400000);
+
+  content.innerHTML += `
+    <div class="records-grid">
+      <div class="record-card">
+        <div class="record-value">${bestStreak}</div>
+        <div class="record-label">Best Streak</div>
+      </div>
+      <div class="record-card">
+        <div class="record-value">${currentStreak}</div>
+        <div class="record-label">Current Streak</div>
+      </div>
+      <div class="record-card">
+        <div class="record-value">${mostReps}</div>
+        <div class="record-label">Most Reps / Day</div>
+      </div>
+      <div class="record-card">
+        <div class="record-value">${daysCompleted}</div>
+        <div class="record-label">Days Completed</div>
+      </div>
+    </div>`;
+
+  content.innerHTML += '<p class="setting-label">Habit Heatmap</p>';
+
   const history = state.history || [];
-  if (history.length > 0) {
-    content.innerHTML += `<p class="setting-label" style="margin-top:20px">Recent Activity</p>`;
-    history.slice(-7).reverse().forEach(date => {
-      content.innerHTML += `<div class="stat-row"><span class="stat-name">${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span class="stat-num" style="color:var(--accent)">✓</span></div>`;
-    });
+  const now = new Date();
+  for (let m = 0; m < 6; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const monthName = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = now.getDate();
+    const isCurrentMonth = m === 0;
+
+    let html = `<div class="heatmap-month"><div class="heatmap-label">${monthName}</div><div class="heatmap-grid">`;
+    for (let i = 0; i < firstDay; i++) html += '<div class="heatmap-day"></div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = new Date(year, month, day).toDateString();
+      const isToday = isCurrentMonth && day === today;
+      const isActive = history.includes(dateStr);
+      let cls = 'heatmap-day';
+      if (isToday) cls += ' today';
+      if (isActive) cls += ' l4';
+      html += `<div class="${cls}"></div>`;
+    }
+    html += '</div></div>';
+    content.innerHTML += html;
   }
-  document.getElementById('statsModal').classList.add('open');
+
+  document.getElementById('historyModal').classList.add('open');
 }
-function closeStats() { document.getElementById('statsModal').classList.remove('open'); }
+function closeHistory() { document.getElementById('historyModal').classList.remove('open'); }
 
 function openSettings() {
   document.getElementById('goalInput').value = state.goal;
@@ -401,13 +433,6 @@ function addNewExercise() {
   input.value = '';
   closeAddExercise();
   render();
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  if (tab === 'home') {
-    document.querySelector('.nav-item').classList.add('active');
-  }
 }
 
 function updateNotifBtn() {

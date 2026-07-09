@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#1B1B1B" />
+  <meta name="theme-color" content="#F5F5F7" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="SassiFit" />
   <title>SassiFit</title>
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
@@ -30,20 +30,22 @@
       </div>
     </header>
 
-    <section id="hero" class="hero">
+    <section class="hero" id="hero">
+      <p class="hero-label">TODAY</p>
       <div id="heroProgress">
         <div class="ring-wrap">
           <svg viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
-            <circle id="ring" cx="60" cy="60" r="54" fill="none" stroke="#BBF246" stroke-width="5" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset .4s cubic-bezier(.34,1.2,.64,1)"/>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#E5E5EA" stroke-width="8"/>
+            <circle id="ring" cx="60" cy="60" r="54" fill="none" stroke="#34C759" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset .2s ease-out"/>
           </svg>
           <span class="ring-pct" id="ringPct">0%</span>
         </div>
-        <p class="hero-sub" id="heroSub">0 reps remaining</p>
+        <p class="hero-remaining" id="heroRemaining">28 left</p>
       </div>
       <div id="heroDone" style="display:none">
+        <p class="done-mark">✓</p>
         <p class="done-title">Daily Goal Complete</p>
-        <p class="done-sub">Come back tomorrow to<br>keep your streak alive.</p>
+        <p class="done-sub">Come back tomorrow</p>
       </div>
       <div class="streak" id="streak" style="display:none">
         <span id="streakText"></span>
@@ -57,8 +59,6 @@
       <div id="summaryRows"></div>
       <div class="sum-total" id="summaryTotal"></div>
     </section>
-
-    <button class="btn-reset" onclick="resetAll()">Reset Day</button>
   </div>
 
   <div id="historyModal" class="modal" onclick="if(event.target===this)closeHistory()">
@@ -88,6 +88,11 @@
         <button class="btn-accent" onclick="addCustom()">Add</button>
       </div>
       <div id="customList"></div>
+      <p class="label">Data</p>
+      <button class="btn-outline" onclick="exportData()">Export Data</button>
+      <button class="btn-outline" onclick="importData()">Import Data</button>
+      <p class="label">Danger</p>
+      <button class="btn-danger" onclick="resetAll()">Reset All Data</button>
       <button class="sheet-close" onclick="closeSettings()">Done</button>
     </div>
   </div>

@@ -34,7 +34,7 @@ function dayCheck(){
   if(tot>=e.length*S.goal&&S.lastDone!==S.date){
     S.lastDone=S.date;const h=S.hist||[];
     if(!h.includes(S.date)){h.push(S.date);S.hist=h;S.days=(S.days||0)+1}
-    S.best=Math.max(S.best||0,streak(h));S.most=Math.max(S.most||0,tot);save();toast('Daily goal achieved!');
+    S.best=Math.max(S.best||0,streak(h));S.most=Math.max(S.most||0,tot);save();
   }
 }
 
@@ -43,29 +43,31 @@ function streak(h){
   for(let i=0;i<365;i++){const d=new Date(t);d.setDate(d.getDate()-i);if(h.includes(d.toDateString()))s++;else if(i>0)break}return s;
 }
 
-function resetAll(){all().forEach(e=>S.reps[e.id]=0);S.done={};S.tl=[];save();render()}
+function resetAll(){if(!confirm('Reset all data? This cannot be undone.'))return;all().forEach(e=>S.reps[e.id]=0);S.done={};S.tl=[];S.hist=[];S.days=0;S.best=0;S.most=0;S.lastDone=null;save();render();closeSettings()}
 
-function toast(m){const o=document.querySelector('.toast');if(o)o.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),250)},1800)}
+function toast(m){const o=document.querySelector('.toast');if(o)o.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),220)},1800)}
 
 function render(){
   const e=all(),tot=e.reduce((s,x)=>s+(S.reps[x.id]||0),0),g=e.length*S.goal,pct=Math.min(100,Math.round(tot/g*100)),rem=Math.max(0,g-tot),done=tot>=g;
   const h=new Date().getHours();document.getElementById('greeting').textContent=h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening';
   if(done){document.getElementById('heroProgress').style.display='none';document.getElementById('heroDone').style.display=''}
-  else{document.getElementById('heroProgress').style.display='';document.getElementById('heroDone').style.display='none';document.getElementById('ring').style.strokeDashoffset=RING-RING*pct/100;document.getElementById('ringPct').textContent=pct+'%';document.getElementById('heroSub').textContent=rem+' reps remaining'}
+  else{document.getElementById('heroProgress').style.display='';document.getElementById('heroDone').style.display='none';document.getElementById('ring').style.strokeDashoffset=RING-RING*pct/100;document.getElementById('ringPct').textContent=pct+'%';document.getElementById('heroRemaining').textContent=rem+' left'}
   const s=streak(S.hist||[]),sl=document.getElementById('streak');
   if(s>0){document.getElementById('streakText').textContent='🔥 '+s+' day streak';sl.style.display=''}else sl.style.display='none';
   const c=document.getElementById('cards');c.innerHTML='';
-  e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal;const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button></div>`;c.appendChild(el)});
+  if(e.length===0){c.innerHTML='<div class="empty">No exercises yet.<br>Add your first exercise in Settings.</div>';return}
+  e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal,left=Math.max(0,S.goal-r);const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><p class="card-left">${d?'Completed':left+' left'}</p><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button></div>`;c.appendChild(el)});
   const sm=document.getElementById('summaryRows');sm.innerHTML='';e.forEach(x=>{const r=S.reps[x.id]||0;sm.innerHTML+=`<div class="sum-row"><span class="sum-ex">${x.name}</span><span class="sum-val">${r}</span></div>`});
   document.getElementById('summaryTotal').innerHTML=`<span>Total</span><b>${tot} reps</b>`;
 }
 
 function openHistory(){
   const c=document.getElementById('historyContent'),cs=streak(S.hist||[]);
-  c.innerHTML=`<div class="rec" style="margin-bottom:20px;text-align:center"><div class="rec-v" style="font-size:36px">${cs}</div><div class="rec-l">Current Streak</div></div>`;
+  c.innerHTML=`<div style="text-align:center;margin-bottom:24px"><p style="font-size:36px;font-weight:800;color:var(--accent)">${cs}</p><p style="font-size:13px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em">Day Streak</p></div>`;
   const hist=S.hist||[],now=new Date();
   for(let m=0;m<6;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1),y=d.getFullYear(),mo=d.getMonth(),first=new Date(y,mo,1).getDay(),days=new Date(y,mo+1,0).getDate(),nm=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});let h=`<div class="hm"><div class="hm-label">${nm}</div><div class="hm-grid">`;for(let i=0;i<first;i++)h+='<div class="hm-day"></div>';for(let day=1;day<=days;day++){const ds=new Date(y,mo,day).toDateString();h+=`<div class="hm-day${hist.includes(ds)?' on':''}${m===0&&day===now.getDate()?' now':''}"></div>`}c.innerHTML+=h+'</div></div>'}
-  c.innerHTML+=`<div class="rec-grid"><div class="rec"><div class="rec-v">${S.best||0}</div><div class="rec-l">Best Streak</div></div><div class="rec"><div class="rec-v">${S.days||0}</div><div class="rec-l">Days Done</div></div><div class="rec"><div class="rec-v">${S.most||0}</div><div class="rec-l">Most Reps</div></div></div>`;
+  c.innerHTML+=`<div class="rec-grid"><div class="rec"><div class="rec-v">${S.days||0}</div><div class="rec-l">Completed Days</div></div><div class="rec"><div class="rec-v">${S.best||0}</div><div class="rec-l">Best Streak</div></div><div class="rec"><div class="rec-v">${S.most||0}</div><div class="rec-l">Most Reps</div></div></div>`;
+  if(hist.length>0){c.innerHTML+='<p class="label">Recent Activity</p>';hist.slice(-7).reverse().forEach(d=>{const dt=new Date(d);c.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid var(--border)"><span style="font-weight:600">${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span><span style="color:var(--accent);font-weight:700">✓</span></div>`})}
   document.getElementById('historyModal').classList.add('open');
 }
 function closeHistory(){document.getElementById('historyModal').classList.remove('open')}
@@ -78,13 +80,15 @@ function renderCustom(){const l=document.getElementById('customList');l.innerHTM
 function addCustom(){const i=document.getElementById('customInput'),n=i.value.trim();if(!n)return;const id='c'+Date.now();if(!S.custom)S.custom=[];S.custom.push({id,name:n});S.reps[id]=0;save();i.value='';renderCustom();render()}
 function rmCustom(id){S.custom=(S.custom||[]).filter(e=>e.id!==id);delete S.reps[id];save();renderCustom();render()}
 
-function isIOS(){return/iPad|iPhone|iPod/.test(navigator.userAgent)}
+function exportData(){const d=JSON.stringify(S,null,2);const b=new Blob([d],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='sassifit-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(u);toast('Data exported')}
+function importData(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.date&&d.reps){S=d;save();render();closeSettings();toast('Data imported')}else toast('Invalid file')}catch(e){toast('Invalid file')}};r.readAsText(f)};i.click()}
 
+function isIOS(){return/iPad|iPhone|iPod/.test(navigator.userAgent)}
 function updateNotif(){
   const b=document.getElementById('notifBtn'),info=document.getElementById('notifInfo');
   if(!('Notification' in window)){b.textContent='Not Supported';return}
-  if(Notification.permission==='granted'){b.textContent='✓ Enabled';b.style.color='#30d158';if(info)info.textContent='8AM, 12PM, 6PM, 9PM when open.'}
-  else if(Notification.permission==='denied'){b.textContent='Blocked';b.style.color='#ff4444';if(info)info.textContent='Enable in browser settings.'}
+  if(Notification.permission==='granted'){b.textContent='✓ Enabled';b.style.color='var(--accent)';if(info)info.textContent='8AM, 12PM, 6PM, 9PM when open.'}
+  else if(Notification.permission==='denied'){b.textContent='Blocked';b.style.color='var(--danger)';if(info)info.textContent='Enable in browser settings.'}
   else{b.textContent='Enable Notifications';if(info)info.textContent=(isIOS()&&!window.navigator.standalone)?'Install to Home Screen for reminders.':''}
 }
 function requestNotifications(){if(!('Notification' in window))return;Notification.requestPermission().then(p=>{if(p==='granted'){S.notifs=true;save();new Notification('SassiFit',{body:'Reminders on.'})}updateNotif()})}

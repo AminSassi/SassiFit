@@ -1,6 +1,6 @@
 # SassiFit
 
-A minimalist habit tracker for daily bodyweight exercise.
+Minimalist daily bodyweight habit tracker. Offline-first. No accounts. No subscriptions.
 
 Build consistency with small daily workouts. Open the app, log your reps, close it. That's it.
 
@@ -39,6 +39,13 @@ Visit **[aminsassi.github.io/SassiFit](https://aminsassi.github.io/SassiFit/)**
 ## Privacy
 
 All data is stored locally on your device. No data is sent to any server. No accounts required.
+
+## Roadmap
+
+- [ ] Apple Health integration
+- [ ] Android Health Connect
+- [ ] Home Screen widgets
+- [ ] Data sync (optional, user-controlled)
 
 ## License
 

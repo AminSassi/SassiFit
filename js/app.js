@@ -45,7 +45,8 @@ function streak(h){
 
 function resetAll(){if(!confirm('Reset all data? This cannot be undone.'))return;all().forEach(e=>S.reps[e.id]=0);S.done={};S.tl=[];S.hist=[];S.days=0;S.best=0;S.most=0;S.lastDone=null;save();render();closeSettings()}
 
-function toast(m){const o=document.querySelector('.toast');if(o)o.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),220)},1800)}
+function announce(m){const a=document.getElementById('announce');if(a)a.textContent=m}
+function toast(m){announce(m);const o=document.querySelector('.toast');if(o)o.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),220)},1800)}
 
 function render(){
   const e=all(),tot=e.reduce((s,x)=>s+(S.reps[x.id]||0),0),g=e.length*S.goal,pct=Math.min(100,Math.round(tot/g*100)),rem=Math.max(0,g-tot),done=tot>=g;
@@ -69,7 +70,7 @@ function render(){
   const s=streak(S.hist||[]),sl=document.getElementById('streak');
   if(s>0){document.getElementById('streakText').textContent='🔥 '+s+' day streak';sl.style.display=''}else sl.style.display='none';
   const c=document.getElementById('cards');c.innerHTML='';
-  if(e.length===0){c.innerHTML='<div class="empty">No exercises yet.<br>Add your first exercise in Settings.</div>';return}
+  if(e.length===0){c.innerHTML='<div class="empty"><p class="empty-title">Welcome to SassiFit</p><p class="empty-sub">Add your first exercise in Settings<br>to get started.</p></div>';return}
   e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal,left=Math.max(0,S.goal-r);const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><p class="card-left">${d?'Completed':left+' left'}</p><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button></div>`;c.appendChild(el)});
   const sm=document.getElementById('summaryRows');sm.innerHTML='';e.forEach(x=>{const r=S.reps[x.id]||0;sm.innerHTML+=`<div class="sum-row"><span class="sum-ex">${x.name}</span><span class="sum-val">${r}</span></div>`});
   document.getElementById('summaryTotal').innerHTML=`<span>Total</span><b>${tot} reps</b>`;

@@ -34,8 +34,8 @@
       <div id="heroProgress">
         <div class="ring-wrap">
           <svg viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-            <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="#BBF246" stroke-width="6" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.6s cubic-bezier(0.34,1.2,0.64,1)"/>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
+            <circle id="ring" cx="60" cy="60" r="54" fill="none" stroke="#BBF246" stroke-width="5" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset .4s cubic-bezier(.34,1.2,.64,1)"/>
           </svg>
           <span class="ring-pct" id="ringPct">0%</span>
         </div>
@@ -43,7 +43,7 @@
       </div>
       <div id="heroDone" style="display:none">
         <p class="done-title">Daily Goal Complete</p>
-        <p class="done-sub">Come back tomorrow to keep your streak alive.</p>
+        <p class="done-sub">Come back tomorrow to<br>keep your streak alive.</p>
       </div>
       <div class="streak" id="streak" style="display:none">
         <span id="streakText"></span>
@@ -52,10 +52,10 @@
 
     <section class="cards" id="cards"></section>
 
-    <section class="summary" id="summary">
+    <section class="summary">
       <p class="summary-title">Today</p>
       <div id="summaryRows"></div>
-      <div class="summary-total" id="summaryTotal"></div>
+      <div class="sum-total" id="summaryTotal"></div>
     </section>
 
     <button class="btn-reset" onclick="resetAll()">Reset Day</button>

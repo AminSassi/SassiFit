@@ -1,27 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#192126"/>
-      <stop offset="100%" style="stop-color:#2a353c"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#BBF246"/>
-      <stop offset="100%" style="stop-color:#a0d63a"/>
-    </linearGradient>
-    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#BBF246"/>
-      <stop offset="50%" style="stop-color:#a0d63a"/>
-      <stop offset="100%" style="stop-color:#8bc232"/>
+      <stop offset="100%" style="stop-color:#9ed630"/>
     </linearGradient>
   </defs>
-  
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  
-  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#ring)" stroke-width="18" stroke-linecap="round" stroke-dasharray="850 280" transform="rotate(-90 256 256)" opacity="0.25"/>
-  
-  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-dasharray="580 550" transform="rotate(-90 256 256)"/>
-  
-  <text x="256" y="285" text-anchor="middle" font-family="Lato, Arial, sans-serif" font-weight="900" font-size="200" fill="url(#accent)">S</text>
-  
-  <path d="M340 180 L370 210 L400 170" stroke="#BBF246" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="512" height="512" rx="112" fill="#1B1B1B"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round" stroke-dasharray="754" stroke-dashoffset="200" transform="rotate(-90 256 256)"/>
+  <text x="256" y="280" text-anchor="middle" font-family="SF Pro Display, -apple-system, Helvetica Neue, sans-serif" font-weight="800" font-size="180" fill="#BBF246">S</text>
 </svg>

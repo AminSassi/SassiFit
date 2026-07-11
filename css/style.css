@@ -43,6 +43,7 @@ header{padding:60px 0 0}
 .btn:active{transform:scale(.92)}
 .btn-p{background:var(--accent);color:#fff}
 .btn-m{flex:0 0 48px;color:var(--dim)}
+.btn-log{flex:0 0 56px;font-size:13px;color:var(--dim)}
 .card-done{border-left:3px solid var(--accent)}
 
 .summary{margin-top:16px;padding:18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}

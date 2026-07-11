@@ -31,7 +31,7 @@ function add(id,n){
 
 function dayCheck(){
   const e=all(),tot=e.reduce((s,x)=>s+(S.reps[x.id]||0),0);
-  if(tot>=e.length*S.goal&&S.lastDone!==S.date){
+  if(tot>0&&S.lastDone!==S.date){
     S.lastDone=S.date;const h=S.hist||[];
     if(!h.includes(S.date)){h.push(S.date);S.hist=h;S.days=(S.days||0)+1}
     S.best=Math.max(S.best||0,streak(h));S.most=Math.max(S.most||0,tot);save();
@@ -71,10 +71,18 @@ function render(){
   if(s>0){document.getElementById('streakText').textContent='🔥 '+s+' day streak';sl.style.display=''}else sl.style.display='none';
   const c=document.getElementById('cards');c.innerHTML='';
   if(e.length===0){c.innerHTML='<div class="empty"><p class="empty-title">Welcome to SassiFit</p><p class="empty-sub">Add your first exercise in Settings<br>to get started.</p></div>';return}
-  e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal,left=Math.max(0,S.goal-r);const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><p class="card-left">${d?'Completed':left+' left'}</p><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button></div>`;c.appendChild(el)});
+  e.forEach(x=>{const r=S.reps[x.id]||0,p=Math.min(100,Math.round(r/S.goal*100)),d=r>=S.goal,left=Math.max(0,S.goal-r);const el=document.createElement('div');el.className='card'+(d?' card-done':'');el.innerHTML=`<div class="card-top"><span class="card-name">${x.name}</span><span class="card-reps"><b>${r}</b> / ${S.goal}</span></div><p class="card-left">${d?'Completed':left+' left'}</p><div class="card-bar"><div class="card-fill" style="width:${p}%"></div></div><div class="card-btns"><button class="btn btn-m" onclick="add('${x.id}',-1)">−</button><button class="btn btn-p" onclick="add('${x.id}',10)">+10</button><button class="btn" onclick="add('${x.id}',50)">+50</button><button class="btn btn-log" onclick="logSet('${x.id}')">Log</button></div>`;c.appendChild(el)});
   const sm=document.getElementById('summaryRows');sm.innerHTML='';e.forEach(x=>{const r=S.reps[x.id]||0;sm.innerHTML+=`<div class="sum-row"><span class="sum-ex">${x.name}</span><span class="sum-val">${r}</span></div>`});
   document.getElementById('summaryTotal').innerHTML=`<span>Total</span><b>${tot} reps</b>`;
   renderTimeline();
+}
+
+function logSet(id){
+  const n=prompt('Enter reps:');
+  if(n===null)return;
+  const v=parseInt(n);
+  if(!isNaN(v)&&v>0)add(id,v);
+  else if(!isNaN(v)&&v<0)add(id,v);
 }
 
 function renderTimeline(){
